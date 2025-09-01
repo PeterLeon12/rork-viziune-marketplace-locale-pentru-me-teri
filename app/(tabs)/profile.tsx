@@ -1,103 +1,180 @@
-import React from 'react';
-import { StyleSheet, Text, View, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
-import { router } from 'expo-router';
-import { 
-  User, 
-  Settings, 
-  HelpCircle, 
-  Star, 
-  Shield, 
-  ChevronRight,
-  LogOut
-} from 'lucide-react-native';
+import React, { useState } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  SafeAreaView,
+  TouchableOpacity,
+  TextInput,
+  Alert,
+} from 'react-native';
+import { useAuth } from '@/contexts/AuthContext';
+import { User, LogOut, Phone } from 'lucide-react-native';
+import Loading from '@/components/Loading';
 
 export default function ProfileScreen() {
-  const handleProOnboarding = () => {
-    router.push('/pro-onboarding');
+  const { user, isAuthenticated, isLoading, login, logout, sendOTP } = useAuth();
+  const [phone, setPhone] = useState<string>('');
+  const [otp, setOtp] = useState<string>('');
+  const [step, setStep] = useState<'phone' | 'otp'>('phone');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  const handleSendOTP = async () => {
+    if (!phone.trim()) {
+      Alert.alert('Eroare', 'Te rugăm să introduci numărul de telefon');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      await sendOTP(phone);
+      setStep('otp');
+      Alert.alert('Succes', 'Codul OTP a fost trimis pe WhatsApp');
+    } catch (error) {
+      Alert.alert('Eroare', 'Nu am putut trimite codul OTP');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  const handleLogin = async () => {
+    if (!otp.trim()) {
+      Alert.alert('Eroare', 'Te rugăm să introduci codul OTP');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      await login(phone, otp);
+      Alert.alert('Succes', 'Te-ai conectat cu succes!');
+    } catch (error) {
+      Alert.alert('Eroare', 'Cod OTP invalid');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    Alert.alert(
+      'Deconectare',
+      'Ești sigur că vrei să te deconectezi?',
+      [
+        { text: 'Anulează', style: 'cancel' },
+        {
+          text: 'Deconectează-te',
+          style: 'destructive',
+          onPress: logout,
+        },
+      ]
+    );
+  };
+
+  if (isLoading) {
+    return <Loading message="Se încarcă..." />;
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.authContainer}>
+          <View style={styles.authHeader}>
+            <User size={48} color="#3B82F6" />
+            <Text style={styles.authTitle}>Conectează-te</Text>
+            <Text style={styles.authSubtitle}>
+              {step === 'phone'
+                ? 'Introdu numărul de telefon pentru a primi codul OTP'
+                : 'Introdu codul OTP primit pe WhatsApp'}
+            </Text>
+          </View>
+
+          {step === 'phone' ? (
+            <View style={styles.inputContainer}>
+              <View style={styles.phoneInputContainer}>
+                <Phone size={20} color="#64748B" />
+                <TextInput
+                  style={styles.phoneInput}
+                  placeholder="+40 7XX XXX XXX"
+                  value={phone}
+                  onChangeText={setPhone}
+                  keyboardType="phone-pad"
+                  autoComplete="tel"
+                />
+              </View>
+              <TouchableOpacity
+                style={[styles.button, isSubmitting && styles.buttonDisabled]}
+                onPress={handleSendOTP}
+                disabled={isSubmitting}
+              >
+                <Text style={styles.buttonText}>
+                  {isSubmitting ? 'Se trimite...' : 'Trimite OTP'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.otpInput}
+                placeholder="Introdu codul OTP"
+                value={otp}
+                onChangeText={setOtp}
+                keyboardType="number-pad"
+                maxLength={6}
+                textAlign="center"
+              />
+              <TouchableOpacity
+                style={[styles.button, isSubmitting && styles.buttonDisabled]}
+                onPress={handleLogin}
+                disabled={isSubmitting}
+              >
+                <Text style={styles.buttonText}>
+                  {isSubmitting ? 'Se verifică...' : 'Conectează-te'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.backButton}
+                onPress={() => setStep('phone')}
+              >
+                <Text style={styles.backButtonText}>Înapoi</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          <Text style={styles.demoNote}>
+            Demo: Folosește codul OTP "123456"
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Profil</Text>
+      <View style={styles.profileContainer}>
+        <View style={styles.profileHeader}>
+          <View style={styles.avatarContainer}>
+            <User size={48} color="white" />
+          </View>
+          <Text style={styles.userName}>{user?.name}</Text>
+          <Text style={styles.userPhone}>{user?.phone}</Text>
+        </View>
+
+        <View style={styles.menuContainer}>
+          <TouchableOpacity style={styles.menuItem}>
+            <Text style={styles.menuItemText}>Istoric comenzi</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.menuItem}>
+            <Text style={styles.menuItemText}>Recenziile mele</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.menuItem}>
+            <Text style={styles.menuItemText}>Setări</Text>
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <LogOut size={20} color="#EF4444" />
+          <Text style={styles.logoutButtonText}>Deconectează-te</Text>
+        </TouchableOpacity>
       </View>
-      
-      <ScrollView style={styles.content}>
-        {/* User Info */}
-        <View style={styles.userCard}>
-          <View style={styles.avatar}>
-            <User size={32} color="#64748B" />
-          </View>
-          <View style={styles.userInfo}>
-            <Text style={styles.userName}>Utilizator Viziune</Text>
-            <Text style={styles.userPhone}>+40 721 234 567</Text>
-          </View>
-        </View>
-
-        {/* Pro Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Pentru meșteri</Text>
-          <TouchableOpacity style={styles.menuItem} onPress={handleProOnboarding}>
-            <View style={styles.menuIcon}>
-              <Shield size={20} color="#059669" />
-            </View>
-            <View style={styles.menuContent}>
-              <Text style={styles.menuTitle}>Devino meșter</Text>
-              <Text style={styles.menuDescription}>
-                Primește clienți noi în fiecare zi
-              </Text>
-            </View>
-            <ChevronRight size={20} color="#94A3B8" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Menu Items */}
-        <View style={styles.section}>
-          <TouchableOpacity style={styles.menuItem}>
-            <View style={styles.menuIcon}>
-              <Star size={20} color="#F59E0B" />
-            </View>
-            <View style={styles.menuContent}>
-              <Text style={styles.menuTitle}>Recenziile mele</Text>
-            </View>
-            <ChevronRight size={20} color="#94A3B8" />
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.menuItem}>
-            <View style={styles.menuIcon}>
-              <Settings size={20} color="#6B7280" />
-            </View>
-            <View style={styles.menuContent}>
-              <Text style={styles.menuTitle}>Setări</Text>
-            </View>
-            <ChevronRight size={20} color="#94A3B8" />
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.menuItem}>
-            <View style={styles.menuIcon}>
-              <HelpCircle size={20} color="#6B7280" />
-            </View>
-            <View style={styles.menuContent}>
-              <Text style={styles.menuTitle}>Ajutor & Suport</Text>
-            </View>
-            <ChevronRight size={20} color="#94A3B8" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Logout */}
-        <View style={styles.section}>
-          <TouchableOpacity style={styles.menuItem}>
-            <View style={styles.menuIcon}>
-              <LogOut size={20} color="#EF4444" />
-            </View>
-            <View style={styles.menuContent}>
-              <Text style={[styles.menuTitle, { color: '#EF4444' }]}>
-                Deconectare
-              </Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -107,90 +184,143 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F8FAFC',
   },
-  header: {
-    backgroundColor: 'white',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+  authContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 24,
   },
-  headerTitle: {
+  authHeader: {
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  authTitle: {
     fontSize: 24,
     fontWeight: '600',
     color: '#1E293B',
-  },
-  content: {
-    flex: 1,
-  },
-  userCard: {
-    backgroundColor: 'white',
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 20,
+    marginTop: 16,
     marginBottom: 8,
   },
-  avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#F1F5F9',
+  authSubtitle: {
+    fontSize: 16,
+    color: '#64748B',
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  inputContainer: {
+    gap: 16,
+  },
+  phoneInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  phoneInput: {
+    flex: 1,
+    fontSize: 16,
+    marginLeft: 12,
+    color: '#1E293B',
+  },
+  otpInput: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    fontSize: 18,
+    fontWeight: '600',
+    letterSpacing: 4,
+  },
+  button: {
+    backgroundColor: '#3B82F6',
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  backButton: {
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  backButtonText: {
+    color: '#64748B',
+    fontSize: 16,
+  },
+  demoNote: {
+    marginTop: 24,
+    fontSize: 14,
+    color: '#F59E0B',
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+  profileContainer: {
+    flex: 1,
+    padding: 24,
+  },
+  profileHeader: {
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  avatarContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#3B82F6',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 16,
-  },
-  userInfo: {
-    flex: 1,
+    marginBottom: 16,
   },
   userName: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '600',
     color: '#1E293B',
     marginBottom: 4,
   },
   userPhone: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#64748B',
   },
-  section: {
+  menuContainer: {
     backgroundColor: 'white',
-    marginBottom: 8,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#374151',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 8,
+    borderRadius: 12,
+    marginBottom: 24,
   },
   menuItem: {
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  menuItemText: {
+    fontSize: 16,
+    color: '#374151',
+  },
+  logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F8FAFC',
-  },
-  menuIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F8FAFC',
-    alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    paddingVertical: 16,
+    borderWidth: 1,
+    borderColor: '#FEE2E2',
   },
-  menuContent: {
-    flex: 1,
-  },
-  menuTitle: {
+  logoutButtonText: {
+    color: '#EF4444',
     fontSize: 16,
     fontWeight: '500',
-    color: '#1E293B',
-    marginBottom: 2,
-  },
-  menuDescription: {
-    fontSize: 14,
-    color: '#64748B',
+    marginLeft: 8,
   },
 });
