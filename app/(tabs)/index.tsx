@@ -10,10 +10,11 @@ import {
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppStore } from '@/store/useAppStore';
-import { categories, areas } from '@/constants/data';
+import { areas } from '@/constants/data';
 import CategoryCard from '@/components/CategoryCard';
 import SearchBar from '@/components/SearchBar';
 import { Category } from '@/types';
+import { trpc } from '@/lib/trpc';
 
 export default function HomeScreen() {
   const {
@@ -25,6 +26,9 @@ export default function HomeScreen() {
     setSelectedArea,
     performSearch,
   } = useAppStore();
+
+  // Fetch categories from backend
+  const { data: categories = [], isLoading: categoriesLoading } = trpc.profiles.getCategories.useQuery();
 
   const handleCategoryPress = (category: Category) => {
     setSelectedCategory(category.id);
