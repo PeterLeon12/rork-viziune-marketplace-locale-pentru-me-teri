@@ -35,6 +35,7 @@ import {
 } from 'lucide-react-native';
 import { trpc } from '@/lib/trpc';
 import { ProCard } from '@/components/ProCard';
+import EnhancedLocationPicker from '@/components/EnhancedLocationPicker';
 
 interface SearchFilters {
   query: string;
@@ -104,6 +105,8 @@ export default function EnhancedSearchScreen() {
   const [filters, setFilters] = useState<SearchFilters>(initialFilters);
   const [showFilters, setShowFilters] = useState(false);
   const [showSortModal, setShowSortModal] = useState(false);
+  const [showLocationPicker, setShowLocationPicker] = useState(false);
+  const [selectedLocationName, setSelectedLocationName] = useState<string>('');
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
 
   // tRPC queries
@@ -206,6 +209,16 @@ export default function EnhancedSearchScreen() {
       style={styles.quickFilters} 
       showsHorizontalScrollIndicator={false}
     >
+      <TouchableOpacity 
+        style={styles.locationChip}
+        onPress={() => setShowLocationPicker(true)}
+      >
+        <MapPin size={14} color="#3B82F6" />
+        <Text style={styles.locationText}>
+          {selectedLocationName || 'Toate locațiile'}
+        </Text>
+      </TouchableOpacity>
+      
       <TouchableOpacity 
         style={[
           styles.quickFilterChip,
@@ -629,6 +642,11 @@ export default function EnhancedSearchScreen() {
     </Modal>
   );
 
+  const handleLocationSelect = (location: any) => {
+    updateFilter('area', location.id);
+    setSelectedLocationName(location.name);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {renderSearchHeader()}
@@ -637,6 +655,14 @@ export default function EnhancedSearchScreen() {
       {renderResults()}
       {renderAdvancedFiltersModal()}
       {renderSortModal()}
+      
+      <EnhancedLocationPicker
+        isVisible={showLocationPicker}
+        onClose={() => setShowLocationPicker(false)}
+        onLocationSelect={handleLocationSelect}
+        title="Selectează locația"
+        placeholder="Caută oraș, județ sau cartier..."
+      />
     </SafeAreaView>
   );
 }
@@ -738,6 +764,24 @@ const styles = StyleSheet.create({
   },
   quickFilterTextActive: {
     color: '#FFFFFF',
+  },
+  locationChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginHorizontal: 4,
+    borderRadius: 20,
+    backgroundColor: '#EBF5FF',
+    borderWidth: 1,
+    borderColor: '#3B82F6',
+    gap: 6,
+    minWidth: 120,
+  },
+  locationText: {
+    fontSize: 12,
+    color: '#3B82F6',
+    fontWeight: '600',
   },
   suggestions: {
     backgroundColor: '#FFFFFF',

@@ -2,13 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, TextInput, SafeAreaView } from 'react-native';
 import { trpc } from '@/lib/trpc';
 import { ProCard } from '@/components/ProCard';
+import EnhancedLocationPicker from '@/components/EnhancedLocationPicker';
 import { Search, MapPin, Filter, Star, X, ChevronDown } from 'lucide-react-native';
 
 export default function SearchScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedArea, setSelectedArea] = useState<string | null>(null);
+  const [selectedAreaName, setSelectedAreaName] = useState<string>('');
   const [showFilters, setShowFilters] = useState(false);
+  const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [sortBy, setSortBy] = useState<'recommended' | 'rating' | 'price' | 'responseTime'>('recommended');
 
   const { data: categories } = trpc.profiles.getCategories.useQuery();
@@ -26,6 +29,11 @@ export default function SearchScreen() {
   // Use real data if available, fallback to mock data
   const profiles = searchResults?.profiles || [];
   const isLoadingProfiles = isLoading;
+
+  const handleLocationSelect = (location: any) => {
+    setSelectedArea(location.id);
+    setSelectedAreaName(location.name);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -46,6 +54,17 @@ export default function SearchScreen() {
             </TouchableOpacity>
           )}
         </View>
+        
+        <TouchableOpacity 
+          style={styles.locationButton}
+          onPress={() => setShowLocationPicker(true)}
+        >
+          <MapPin size={16} color="#3B82F6" />
+          <Text style={styles.locationButtonText}>
+            {selectedAreaName || 'Locație'}
+          </Text>
+        </TouchableOpacity>
+
         <TouchableOpacity 
           style={[styles.filterButton, (selectedCategory || selectedArea) && styles.filterButtonActive]}
           onPress={() => setShowFilters(!showFilters)}
@@ -207,6 +226,14 @@ export default function SearchScreen() {
           </View>
         )}
       </ScrollView>
+      
+      <EnhancedLocationPicker
+        isVisible={showLocationPicker}
+        onClose={() => setShowLocationPicker(false)}
+        onLocationSelect={handleLocationSelect}
+        title="Selectează locația"
+        placeholder="Caută oraș, județ sau cartier..."
+      />
     </SafeAreaView>
   );
 }
@@ -259,6 +286,23 @@ const styles = StyleSheet.create({
   filterBadgeText: {
     color: '#FFFFFF',
     fontSize: 12,
+    fontWeight: '600',
+  },
+  locationButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: '#EBF5FF',
+    borderWidth: 1,
+    borderColor: '#3B82F6',
+    gap: 6,
+    marginHorizontal: 8,
+  },
+  locationButtonText: {
+    fontSize: 14,
+    color: '#3B82F6',
     fontWeight: '600',
   },
   filtersContainer: {

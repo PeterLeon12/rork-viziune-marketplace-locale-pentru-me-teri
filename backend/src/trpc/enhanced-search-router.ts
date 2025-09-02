@@ -8,6 +8,13 @@ import {
   categories, 
   areas
 } from '../db/schema';
+import { 
+  romanianLocations, 
+  searchLocations, 
+  getMajorCities, 
+  getAllCounties,
+  getLocationsByCounty 
+} from '../db/romanian-locations';
 import { eq, inArray, gte, lte, desc, asc, and, or, like, sql, count } from 'drizzle-orm';
 
 // Enhanced search schema with filters available in current schema
@@ -347,6 +354,165 @@ export const enhancedSearchRouter = createTRPCRouter({
       } catch (error) {
         console.error('Error in getNearbyProfessionals:', error);
         throw new Error('Failed to get nearby professionals');
+      }
+    }),
+
+  // Enhanced Location Management Endpoints
+
+  // Search all Romanian locations
+  searchAllLocations: publicProcedure
+    .input(z.object({
+      query: z.string().min(1),
+      limit: z.number().min(1).max(50).default(10),
+      type: z.enum(['all', 'county_capital', 'major_city', 'city', 'neighborhood', 'sector']).optional().default('all'),
+    }))
+    .query(async ({ input }) => {
+      try {
+        const { query, limit, type } = input;
+        
+        let locations = searchLocations(query, 100); // Get more results to filter
+        
+        if (type !== 'all') {
+          locations = locations.filter(location => location.type === type);
+        }
+        
+        return {
+          locations: locations.slice(0, limit),
+          totalFound: locations.length,
+          query,
+        };
+      } catch (error) {
+        console.error('Error in searchAllLocations:', error);
+        throw new Error('Failed to search locations');
+      }
+    }),
+
+  // Get all major cities
+  getMajorCities: publicProcedure
+    .query(async () => {
+      try {
+        const majorCities = getMajorCities();
+        
+        return {
+          cities: majorCities.slice(0, 20), // Top 20 cities by population
+          totalCities: majorCities.length,
+        };
+      } catch (error) {
+        console.error('Error in getMajorCities:', error);
+        throw new Error('Failed to get major cities');
+      }
+    }),
+
+  // Get all counties
+  getAllCounties: publicProcedure
+    .query(async () => {
+      try {
+        const counties = getAllCounties();
+        
+        return {
+          counties,
+          totalCounties: counties.length,
+        };
+      } catch (error) {
+        console.error('Error in getAllCounties:', error);
+        throw new Error('Failed to get counties');
+      }
+    }),
+
+  // Get locations by county
+  getLocationsByCounty: publicProcedure
+    .input(z.object({
+      county: z.string(),
+      includeNeighborhoods: z.boolean().default(false),
+    }))
+    .query(async ({ input }) => {
+      try {
+        const { county, includeNeighborhoods } = input;
+        
+        let locations = getLocationsByCounty(county);
+        
+        if (!includeNeighborhoods) {
+          locations = locations.filter(location => 
+            location.type !== 'neighborhood' && location.type !== 'sector'
+          );
+        }
+        
+        // Sort by population (biggest first)
+        locations.sort((a, b) => (b.population || 0) - (a.population || 0));
+        
+        return {
+          locations,
+          county,
+          totalFound: locations.length,
+        };
+      } catch (error) {
+        console.error('Error in getLocationsByCounty:', error);
+        throw new Error('Failed to get locations by county');
+      }
+    }),
+
+  // Get comprehensive location suggestions for autocomplete
+  getLocationSuggestions: publicProcedure
+    .input(z.object({
+      query: z.string().min(1),
+      limit: z.number().min(1).max(20).default(10),
+      prioritizeMajorCities: z.boolean().default(true),
+    }))
+    .query(async ({ input }) => {
+      try {
+        const { query, limit, prioritizeMajorCities } = input;
+        
+        let suggestions = searchLocations(query, limit * 2);
+        
+        if (prioritizeMajorCities) {
+          // Boost major cities and county capitals in results
+          suggestions.sort((a, b) => {
+            const aScore = (a.type === 'county_capital' ? 100 : 0) + 
+                          (a.type === 'major_city' ? 80 : 0) + 
+                          (a.population || 0) / 1000;
+            const bScore = (b.type === 'county_capital' ? 100 : 0) + 
+                          (b.type === 'major_city' ? 80 : 0) + 
+                          (b.population || 0) / 1000;
+            return bScore - aScore;
+          });
+        }
+        
+        return suggestions.slice(0, limit).map(location => ({
+          id: location.id,
+          name: location.name,
+          fullName: `${location.name}, ${location.county}`,
+          city: location.city,
+          county: location.county,
+          type: location.type,
+          population: location.population,
+        }));
+      } catch (error) {
+        console.error('Error in getLocationSuggestions:', error);
+        throw new Error('Failed to get location suggestions');
+      }
+    }),
+
+  // Get popular locations (most searched/used areas)
+  getPopularLocations: publicProcedure
+    .query(async () => {
+      try {
+        // Get the most populated and important cities
+        const popularLocations = getMajorCities().slice(0, 15);
+        
+        // Add some important neighborhoods from major cities
+        const importantNeighborhoods = romanianLocations.filter(location => 
+          location.type === 'neighborhood' && 
+          ['Cluj-Napoca', 'București', 'Timișoara', 'Iași', 'Constanța'].includes(location.city)
+        );
+        
+        return {
+          majorCities: popularLocations,
+          importantNeighborhoods,
+          totalLocations: romanianLocations.length,
+        };
+      } catch (error) {
+        console.error('Error in getPopularLocations:', error);
+        throw new Error('Failed to get popular locations');
       }
     }),
 });
