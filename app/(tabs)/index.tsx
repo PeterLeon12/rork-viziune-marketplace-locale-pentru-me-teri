@@ -71,8 +71,8 @@ function ClientHomeScreen() {
   const { data: categories } = trpc.profiles.getCategories.useQuery();
   const { data: areas } = trpc.profiles.getAreas.useQuery();
 
-  // Get popular categories from backend
-  const { data: popularCategories = [] } = trpc.profiles.getPopularCategories.useQuery();
+  // Get all categories from backend (they're all popular in our focused approach)
+  const { data: allCategories = [] } = trpc.profiles.getAllCategories.useQuery();
 
   const quickActions = [
     { 
@@ -176,7 +176,7 @@ function ClientHomeScreen() {
             </TouchableOpacity>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesScroll}>
-            {popularCategories.map((category) => (
+            {allCategories.map((category) => (
               <CategoryCard
                 key={category.id}
                 category={category}

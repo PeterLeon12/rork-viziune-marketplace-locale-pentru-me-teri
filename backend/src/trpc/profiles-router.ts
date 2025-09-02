@@ -4,10 +4,9 @@ import { db } from '../db/adapter';
 import { proProfiles, services, reviews, categories, areas } from '../db/schema';
 import { eq, inArray, gte, lte, desc, asc, and, or, like } from 'drizzle-orm';
 import { 
-  comprehensiveCategories, 
+  focusedCategories, 
   getPopularCategories, 
-  getEmergencyCategories, 
-  getBusinessCategories, 
+  getAllCategories, 
   searchCategories 
 } from '../db/comprehensive-categories';
 
@@ -202,8 +201,8 @@ export const profilesRouter = createTRPCRouter({
   getCategories: publicProcedure
     .query(async () => {
       try {
-        // Return comprehensive categories instead of database categories
-        return comprehensiveCategories;
+        // Return focused categories instead of database categories
+        return focusedCategories;
       } catch (error) {
         console.error('Error in getCategories:', error);
         throw new Error('Failed to get categories');
@@ -220,23 +219,13 @@ export const profilesRouter = createTRPCRouter({
       }
     }),
 
-  getEmergencyCategories: publicProcedure
+  getAllCategories: publicProcedure
     .query(async () => {
       try {
-        return getEmergencyCategories();
+        return getAllCategories();
       } catch (error) {
-        console.error('Error in getEmergencyCategories:', error);
-        throw new Error('Failed to get emergency categories');
-      }
-    }),
-
-  getBusinessCategories: publicProcedure
-    .query(async () => {
-      try {
-        return getBusinessCategories();
-      } catch (error) {
-        console.error('Error in getBusinessCategories:', error);
-        throw new Error('Failed to get business categories');
+        console.error('Error in getAllCategories:', error);
+        throw new Error('Failed to get all categories');
       }
     }),
 

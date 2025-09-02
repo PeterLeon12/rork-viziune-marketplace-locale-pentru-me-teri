@@ -1,21 +1,18 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
 
-interface ComprehensiveCategory {
+interface FocusedCategory {
   id: string;
   name: string;
   description: string;
   icon: string;
   color: string;
-  subcategories?: string[];
-  popular: boolean;
-  emergency: boolean;
-  business: boolean;
+  subcategories: string[];
 }
 
 interface CategoryCardProps {
-  category: ComprehensiveCategory;
-  onPress: (category: ComprehensiveCategory) => void;
+  category: FocusedCategory;
+  onPress: (category: FocusedCategory) => void;
   selected?: boolean;
   showDescription?: boolean;
 }
