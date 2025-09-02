@@ -100,37 +100,72 @@ export const jobs = pgTable('jobs', {
 export const jobApplications = pgTable('job_applications', {
   id: uuid('id').primaryKey().defaultRandom(),
   jobId: uuid('job_id').notNull().references(() => jobs.id, { onDelete: 'cascade' }),
-  artisanId: uuid('artisan_id').notNull().references(() => proProfiles.id, { onDelete: 'cascade' }),
+  proId: uuid('pro_id').notNull().references(() => proProfiles.id, { onDelete: 'cascade' }),
+  price: integer('price').notNull(),
   message: text('message').notNull(),
-  proposedPrice: integer('proposed_price'), // in RON
-  estimatedDuration: text('estimated_duration'), // e.g., "2 hours", "1 day"
-  status: text('status', { enum: ['pending', 'accepted', 'rejected'] }).notNull().default('pending'),
+  estimatedTime: text('estimated_time').notNull(),
+  status: text('status', { enum: ['pending', 'accepted', 'rejected', 'completed'] }).notNull().default('pending'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
-// Bookings table (confirmed appointments)
+// Bookings table
 export const bookings = pgTable('bookings', {
   id: uuid('id').primaryKey().defaultRandom(),
   jobId: uuid('job_id').notNull().references(() => jobs.id, { onDelete: 'cascade' }),
-  artisanId: uuid('artisan_id').notNull().references(() => proProfiles.id, { onDelete: 'cascade' }),
+  proId: uuid('pro_id').notNull().references(() => proProfiles.id, { onDelete: 'cascade' }),
   clientId: uuid('client_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   scheduledDate: timestamp('scheduled_date').notNull(),
-  duration: integer('duration'), // in minutes
-  price: integer('price').notNull(), // in RON
-  status: text('status', { enum: ['scheduled', 'in_progress', 'completed', 'cancelled'] }).notNull().default('scheduled'),
+  status: text('status', { enum: ['confirmed', 'in_progress', 'completed', 'cancelled'] }).notNull().default('confirmed'),
+  totalPrice: integer('total_price').notNull(),
   notes: text('notes'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
-// OTP verification table
+// OTP verifications table
 export const otpVerifications = pgTable('otp_verifications', {
   id: uuid('id').primaryKey().defaultRandom(),
   phone: text('phone').notNull(),
   otp: text('otp').notNull(),
   expiresAt: timestamp('expires_at').notNull(),
   verified: boolean('verified').notNull().default(false),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+// Conversations table for messaging
+export const conversations = pgTable('conversations', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  clientId: uuid('client_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  proId: uuid('pro_id').notNull().references(() => proProfiles.id, { onDelete: 'cascade' }),
+  jobId: uuid('job_id').notNull().references(() => jobs.id, { onDelete: 'cascade' }),
+  lastMessage: text('last_message'),
+  lastMessageAt: timestamp('last_message_at'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+// Messages table for individual messages
+export const messages = pgTable('messages', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  conversationId: uuid('conversation_id').notNull().references(() => conversations.id, { onDelete: 'cascade' }),
+  senderId: uuid('sender_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  content: text('content').notNull(),
+  messageType: text('message_type', { enum: ['text', 'image', 'file'] }).notNull().default('text'),
+  attachmentUrl: text('attachment_url'),
+  readAt: timestamp('read_at'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+// Notifications table for push notifications
+export const notifications = pgTable('notifications', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  title: text('title').notNull(),
+  body: text('body').notNull(),
+  type: text('type', { enum: ['job_update', 'message', 'application', 'booking', 'payment'] }).notNull(),
+  data: jsonb('data'), // Additional data for the notification
+  read: boolean('read').notNull().default(false),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
@@ -186,7 +221,7 @@ export const jobApplicationsRelations = relations(jobApplications, ({ one }) => 
     references: [jobs.id],
   }),
   artisan: one(proProfiles, {
-    fields: [jobApplications.artisanId],
+    fields: [jobApplications.proId],
     references: [proProfiles.id],
   }),
 }));
@@ -197,7 +232,7 @@ export const bookingsRelations = relations(bookings, ({ one }) => ({
     references: [jobs.id],
   }),
   artisan: one(proProfiles, {
-    fields: [bookings.artisanId],
+    fields: [bookings.proId],
     references: [proProfiles.id],
   }),
   client: one(users, {
