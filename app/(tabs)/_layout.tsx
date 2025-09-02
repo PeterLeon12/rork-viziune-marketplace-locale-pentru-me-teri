@@ -77,11 +77,8 @@ export default function TabLayout() {
         />
 
         {/* Hide other screens from professional tabs */}
-        <Tabs.Screen name="client" options={{ href: null }} />
-        <Tabs.Screen name="professional" options={{ href: null }} />
         <Tabs.Screen name="enhanced-profile" options={{ href: null }} />
         <Tabs.Screen name="profile" options={{ href: null }} />
-        <Tabs.Screen name="role-router" options={{ href: null }} />
         <Tabs.Screen name="search" options={{ href: null }} />
         <Tabs.Screen name="post-job" options={{ href: null }} />
       </Tabs>
@@ -166,11 +163,8 @@ export default function TabLayout() {
       />
 
       {/* Hide other screens from client tabs */}
-      <Tabs.Screen name="client" options={{ href: null }} />
-      <Tabs.Screen name="professional" options={{ href: null }} />
       <Tabs.Screen name="enhanced-profile" options={{ href: null }} />
       <Tabs.Screen name="profile" options={{ href: null }} />
-      <Tabs.Screen name="role-router" options={{ href: null }} />
     </Tabs>
   );
 }
