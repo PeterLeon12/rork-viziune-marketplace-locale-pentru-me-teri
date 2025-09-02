@@ -211,4 +211,44 @@ export const profilesRouter = createTRPCRouter({
         throw new Error('Failed to get areas');
       }
     }),
+
+  // Monetization: Get commission history
+  getCommissionHistory: protectedProcedure
+    .input(z.object({
+      limit: z.number().min(1).max(100).default(20),
+      offset: z.number().min(0).default(0),
+    }))
+    .query(async ({ ctx, input }) => {
+      try {
+        // Get user's completed jobs and calculate commissions
+        // For now, return mock data until we implement the database method
+        const mockCommissions = [
+          {
+            jobId: '1',
+            jobTitle: 'Reparație ușă garaj',
+            amount: 350,
+            commission: 17.5, // 5% commission
+            status: 'pending' as const,
+            completedDate: new Date('2024-01-15'),
+          },
+          {
+            jobId: '2',
+            jobTitle: 'Instalare sistem încălzire',
+            amount: 6500,
+            commission: 325, // 5% commission
+            status: 'paid' as const,
+            completedDate: new Date('2024-01-10'),
+          }
+        ];
+        
+        return {
+          commissions: mockCommissions.slice(input.offset, input.offset + input.limit),
+          total: mockCommissions.length,
+          totalEarnings: mockCommissions.reduce((sum: number, c: any) => sum + c.commission, 0),
+        };
+      } catch (error) {
+        console.error('Error in getCommissionHistory:', error);
+        throw new Error('Failed to get commission history');
+      }
+    }),
 });

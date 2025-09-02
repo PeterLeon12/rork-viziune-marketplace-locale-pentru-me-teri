@@ -21,6 +21,8 @@ import {
   Phone,
   CheckCircle
 } from 'lucide-react-native';
+import { trpc } from '@/lib/trpc';
+import { useAuth } from '@/contexts/AuthContext';
 
 const steps = [
   { id: 1, title: 'Date personale', icon: User },
@@ -33,6 +35,7 @@ const steps = [
 ];
 
 export default function ProOnboardingScreen() {
+  const { user, isAuthenticated } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     name: '',
@@ -40,15 +43,22 @@ export default function ProOnboardingScreen() {
     company: '',
     description: '',
     minPrice: '',
+    categories: [] as string[],
+    zones: [] as string[],
+    contactPhone: '',
+    whatsappLink: '',
+    photoUrl: '',
   });
 
-  const handleNext = () => {
-    if (currentStep < steps.length) {
-      setCurrentStep(currentStep + 1);
-    } else {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // tRPC mutation for creating professional profile
+  const createProfileMutation = trpc.profiles.createProfile.useMutation({
+    onSuccess: (data) => {
+      setIsSubmitting(false);
       Alert.alert(
-        'Profil creat!',
-        'Profilul tău a fost trimis spre verificare. Vei primi un email când va fi aprobat.',
+        'Profil creat cu succes! 🎉',
+        'Profilul tău a fost trimis spre verificare. Vei primi notificări când va fi aprobat.',
         [
           {
             text: 'OK',
@@ -56,6 +66,50 @@ export default function ProOnboardingScreen() {
           },
         ]
       );
+    },
+    onError: (error) => {
+      setIsSubmitting(false);
+      Alert.alert('Eroare', `Nu am putut crea profilul: ${error.message}`);
+    },
+  });
+
+  const handleSubmit = async () => {
+    if (!isAuthenticated) {
+      Alert.alert('Eroare', 'Trebuie să fii conectat pentru a crea un profil profesional');
+      return;
+    }
+
+    if (!formData.name || !formData.company || !formData.description || formData.categories.length === 0 || formData.zones.length === 0) {
+      Alert.alert('Eroare', 'Te rugăm să completezi toate câmpurile obligatorii.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await createProfileMutation.mutateAsync({
+        displayName: formData.name,
+        company: formData.company,
+        categories: formData.categories,
+        zones: formData.zones,
+        minPrice: parseFloat(formData.minPrice) || 0,
+        about: formData.description,
+        contact: {
+          phone: formData.contactPhone || formData.phone,
+          whatsappLink: formData.whatsappLink || `https://wa.me/${formData.contactPhone || formData.phone}`,
+        },
+        photoUrl: formData.photoUrl || undefined,
+      });
+    } catch (error) {
+      // Error handling is done in onError callback
+    }
+  };
+
+  const handleNext = () => {
+    if (currentStep < steps.length) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      handleSubmit();
     }
   };
 

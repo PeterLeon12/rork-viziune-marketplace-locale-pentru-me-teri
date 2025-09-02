@@ -22,8 +22,11 @@ import {
   AlertCircle
 } from 'lucide-react-native';
 import { useAppStore } from '@/store/useAppStore';
+import { trpc } from '@/lib/trpc';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function PostJobScreen() {
+  const { user, isAuthenticated } = useAuth();
   const { categories, areas } = useAppStore();
   const [formData, setFormData] = useState({
     title: '',
@@ -31,29 +34,16 @@ export default function PostJobScreen() {
     category: '',
     location: '',
     budget: '',
-    urgency: 'normal',
+    urgency: 'normal' as 'low' | 'normal' | 'high',
     contactPhone: '',
   });
 
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const urgencyOptions = [
-    { value: 'low', label: 'Nu e urgent', icon: Clock, color: '#10B981' },
-    { value: 'normal', label: 'În următoarele zile', icon: Calendar, color: '#3B82F6' },
-    { value: 'high', label: 'Urgent (azi/mâine)', icon: AlertCircle, color: '#EF4444' },
-  ];
-
-  const handleSubmit = async () => {
-    if (!formData.title || !formData.description || !formData.category || !formData.location) {
-      Alert.alert('Eroare', 'Te rugăm să completezi toate câmpurile obligatorii.');
-      return;
-    }
-
-    setIsSubmitting(true);
-    
-    // Simulate API call
-    setTimeout(() => {
+  // tRPC mutation for creating jobs
+  const createJobMutation = trpc.jobs.createJob.useMutation({
+    onSuccess: (data) => {
       setIsSubmitting(false);
       Alert.alert(
         'Job Postat cu Succes! 🎉',
@@ -80,7 +70,49 @@ export default function PostJobScreen() {
           },
         ]
       );
-    }, 2000);
+    },
+    onError: (error) => {
+      setIsSubmitting(false);
+      Alert.alert('Eroare', `Nu am putut posta job-ul: ${error.message}`);
+    },
+  });
+
+  const urgencyOptions = [
+    { value: 'low', label: 'Nu e urgent', icon: Clock, color: '#10B981' },
+    { value: 'normal', label: 'În următoarele zile', icon: Calendar, color: '#3B82F6' },
+    { value: 'high', label: 'Urgent (azi/mâine)', icon: AlertCircle, color: '#EF4444' },
+  ];
+
+  const handleSubmit = async () => {
+    if (!isAuthenticated) {
+      Alert.alert('Eroare', 'Trebuie să fii conectat pentru a posta un job');
+      return;
+    }
+
+    if (!formData.title || !formData.description || !formData.category || !formData.location) {
+      Alert.alert('Eroare', 'Te rugăm să completezi toate câmpurile obligatorii.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await createJobMutation.mutateAsync({
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        area: formData.location,
+        budget: formData.budget ? parseFloat(formData.budget) : undefined,
+        urgency: formData.urgency === 'low' ? 'low' : formData.urgency === 'high' ? 'high' : 'medium',
+        location: {
+          address: formData.location,
+          lat: 0, // Will be updated with real geocoding
+          lng: 0,
+        },
+      });
+    } catch (error) {
+      // Error handling is done in onError callback
+    }
   };
 
   const renderStep1 = () => (

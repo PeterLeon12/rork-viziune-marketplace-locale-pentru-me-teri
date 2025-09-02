@@ -24,9 +24,11 @@ import {
   Info,
   ChevronRight,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Crown
 } from 'lucide-react-native';
 import Loading from '@/components/Loading';
+import { useRouter } from 'expo-router';
 
 export default function ProfileScreen() {
   const { user, isAuthenticated, isLoading, login, logout, sendOTP } = useAuth();
@@ -34,6 +36,7 @@ export default function ProfileScreen() {
   const [otp, setOtp] = useState<string>('');
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const router = useRouter();
 
   const handleSendOTP = async () => {
     if (!phone.trim()) {
@@ -251,6 +254,19 @@ export default function ProfileScreen() {
                 <Settings size={20} color="#EF4444" />
               </View>
               <Text style={styles.menuItemText}>Setări</Text>
+            </View>
+            <ChevronRight size={20} color="#9CA3AF" />
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.menuItem}
+            onPress={() => router.push('/subscription')}
+          >
+            <View style={styles.menuItemLeft}>
+              <View style={[styles.menuIcon, { backgroundColor: '#FEF3C7' }]}>
+                <Crown size={20} color="#F59E0B" />
+              </View>
+              <Text style={styles.menuItemText}>Planuri de Abonare</Text>
             </View>
             <ChevronRight size={20} color="#9CA3AF" />
           </TouchableOpacity>

@@ -14,106 +14,18 @@ export default function SearchScreen() {
   const { data: categories } = trpc.profiles.getCategories.useQuery();
   const { data: areas } = trpc.profiles.getAreas.useQuery();
   
-  // Mock search results for now - replace with real API call
-  const mockProfiles = [
-    {
-      id: '1',
-      displayName: 'Ion Popescu',
-      company: 'Instalatorii Popescu',
-      categories: ['Instalator', 'Încălzire'],
-      zones: ['Cluj-Napoca', 'Turda'],
-      minPrice: 50,
-      about: 'Instalator cu 15 ani experiență. Specializat în instalații sanitare și de încălzire. Lucrări garantate și prețuri corecte.',
-      verified: true,
-      responseTimeAvgMins: 30,
-      ratingAvg: 4.8,
-      ratingCount: 25,
-      photoUrl: null,
-    },
-    {
-      id: '2',
-      displayName: 'Maria Ionescu',
-      company: 'Electro Maria',
-      categories: ['Electric', 'Electrocasnice'],
-      zones: ['București', 'Ilfov'],
-      minPrice: 60,
-      about: 'Electriciană certificată cu 10 ani experiență. Reparații și instalații electrice. Lucrări de calitate și prețuri corecte.',
-      verified: true,
-      responseTimeAvgMins: 45,
-      ratingAvg: 4.9,
-      ratingCount: 18,
-      photoUrl: null,
-    },
-    {
-      id: '3',
-      displayName: 'Alexandru Dumitrescu',
-      company: 'AC Expert',
-      categories: ['Montaj AC', 'Electrocasnice'],
-      zones: ['Timișoara', 'Arad'],
-      minPrice: 80,
-      about: 'Specialist în montaj și întreținere AC. Servicii profesionale și garantate. Răspuns rapid și prețuri competitive.',
-      verified: false,
-      responseTimeAvgMins: 60,
-      ratingAvg: 4.6,
-      ratingCount: 12,
-      photoUrl: null,
-    },
-    {
-      id: '4',
-      displayName: 'Vasile Munteanu',
-      company: 'Zugravi Munteanu',
-      categories: ['Zugraveli', 'Renovări'],
-      zones: ['Cluj-Napoca', 'Dej'],
-      minPrice: 40,
-      about: 'Zugrav cu 20 ani experiență. Renovări complete, zugrăveli interioare și exterioare. Calitate superioară garantată.',
-      verified: true,
-      responseTimeAvgMins: 90,
-      ratingAvg: 4.7,
-      ratingCount: 32,
-      photoUrl: null,
-    },
-  ];
-
-  const filteredProfiles = mockProfiles.filter(profile => {
-    if (searchQuery && !profile.displayName.toLowerCase().includes(searchQuery.toLowerCase()) && 
-        !profile.company.toLowerCase().includes(searchQuery.toLowerCase()) &&
-        !profile.about.toLowerCase().includes(searchQuery.toLowerCase())) {
-      return false;
-    }
-    if (selectedCategory && !profile.categories.includes(selectedCategory)) {
-      return false;
-    }
-    if (selectedArea && !profile.zones.includes(selectedArea)) {
-      return false;
-    }
-    return true;
+  // Real search using tRPC
+  const { data: searchResults, isLoading } = trpc.profiles.searchProfiles.useQuery({
+    query: searchQuery || undefined,
+    category: selectedCategory || undefined,
+    area: selectedArea || undefined,
+    sortBy: sortBy,
+    limit: 20,
   });
 
-  const sortProfiles = (profiles: typeof mockProfiles) => {
-    switch (sortBy) {
-      case 'rating':
-        return [...profiles].sort((a, b) => b.ratingAvg - a.ratingAvg);
-      case 'price':
-        return [...profiles].sort((a, b) => a.minPrice - b.minPrice);
-      case 'responseTime':
-        return [...profiles].sort((a, b) => a.responseTimeAvgMins - b.responseTimeAvgMins);
-      case 'recommended':
-      default:
-        return [...profiles].sort((a, b) => {
-          const scoreA = (a.ratingAvg * 0.4) + 
-                        ((60 - Math.min(a.responseTimeAvgMins, 60)) / 60 * 0.2) +
-                        (Math.min(a.ratingCount, 100) / 100 * 0.15) +
-                        (a.verified ? 0.25 : 0);
-          const scoreB = (b.ratingAvg * 0.4) + 
-                        ((60 - Math.min(b.responseTimeAvgMins, 60)) / 60 * 0.2) +
-                        (Math.min(b.ratingCount, 100) / 100 * 0.15) +
-                        (b.verified ? 0.25 : 0);
-          return scoreB - scoreA;
-        });
-    }
-  };
-
-  const sortedProfiles = sortProfiles(filteredProfiles);
+  // Use real data if available, fallback to mock data
+  const profiles = searchResults?.profiles || [];
+  const isLoadingProfiles = isLoading;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -269,10 +181,17 @@ export default function SearchScreen() {
       <ScrollView style={styles.resultsContainer} showsVerticalScrollIndicator={false}>
         <View style={styles.resultsHeader}>
           <Text style={styles.resultsTitle}>Rezultate</Text>
-          <Text style={styles.resultsCount}>{sortedProfiles.length} profesioniști găsiți</Text>
+          <Text style={styles.resultsCount}>{profiles.length} profesioniști găsiți</Text>
         </View>
 
-        {sortedProfiles.length === 0 ? (
+        {isLoadingProfiles ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateTitle}>Căutare în curs...</Text>
+            <Text style={styles.emptyStateText}>
+              Încărcăm profesioniștii care îndeplinesc criteriile de căutare.
+            </Text>
+          </View>
+        ) : profiles.length === 0 ? (
           <View style={styles.emptyState}>
             <Search size={48} color="#D1D5DB" />
             <Text style={styles.emptyStateTitle}>Nu s-au găsit profesioniști</Text>
@@ -282,7 +201,7 @@ export default function SearchScreen() {
           </View>
         ) : (
           <View style={styles.profilesList}>
-            {sortedProfiles.map((profile) => (
+            {profiles.map((profile) => (
               <ProCard key={profile.id} profile={profile} />
             ))}
           </View>

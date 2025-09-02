@@ -23,6 +23,8 @@ import {
   XCircle,
   MoreVertical
 } from 'lucide-react-native';
+import { useAuth } from '@/hooks/useAuth';
+import { trpc } from '@/utils/trpc';
 
 interface Job {
   id: string;
@@ -40,55 +42,11 @@ interface Job {
 
 export default function JobsScreen() {
   const [activeTab, setActiveTab] = useState('posted');
-  const [jobs, setJobs] = useState<Job[]>([
-    {
-      id: '1',
-      title: 'Vreau să îmi repar ușa de la garaj',
-      description: 'Ușa de la garaj nu se închide bine și am nevoie să fie reparată urgent.',
-      category: 'Întreținere',
-      location: 'Cluj-Napoca, Centru',
-      budget: '200-500 RON',
-      urgency: 'high',
-      status: 'active',
-      applications: 3,
-      postedDate: '2024-01-15',
-      responses: [
-        { id: '1', name: 'Ion Popescu', rating: 4.8, price: '350 RON', responseTime: '2h' },
-        { id: '2', name: 'Maria Ionescu', rating: 4.9, price: '400 RON', responseTime: '4h' },
-        { id: '3', name: 'Alexandru Dumitrescu', rating: 4.7, price: '300 RON', responseTime: '6h' },
-      ]
-    },
-    {
-      id: '2',
-      title: 'Instalare sistem de încălzire',
-      description: 'Am nevoie să instalez un sistem de încălzire nou în casa mea.',
-      category: 'Instalații',
-      location: 'București, Sector 1',
-      budget: '5000-8000 RON',
-      urgency: 'normal',
-      status: 'active',
-      applications: 1,
-      postedDate: '2024-01-14',
-      responses: [
-        { id: '1', name: 'Vasile Marin', rating: 4.9, price: '6500 RON', responseTime: '1h' },
-      ]
-    },
-    {
-      id: '3',
-      title: 'Vopsire apartament 2 camere',
-      description: 'Vreau să vopsesc apartamentul meu de 2 camere în culori moderne.',
-      category: 'Vopsire',
-      location: 'Timișoara, Centru',
-      budget: '800-1200 RON',
-      urgency: 'low',
-      status: 'completed',
-      applications: 5,
-      postedDate: '2024-01-10',
-      responses: [
-        { id: '1', name: 'Elena Popa', rating: 4.8, price: '1000 RON', responseTime: '3h' },
-      ]
-    }
-  ]);
+  const { user } = useAuth();
+  const { data: jobs, isLoading, error } = trpc.jobs.getMyJobs.useQuery({ 
+    status: activeTab === 'posted' ? 'open' : 'completed',
+    limit: 50 
+  });
 
   const renderJobCard = ({ item }: { item: Job }) => (
     <View style={styles.jobCard}>
