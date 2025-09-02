@@ -5,8 +5,67 @@ import { trpc } from '@/lib/trpc';
 import CategoryCard from '@/components/CategoryCard';
 import { MapPin, Star, Clock, Shield, TrendingUp, ArrowRight, CheckCircle } from 'lucide-react-native';
 import { router } from 'expo-router';
+import { useOptimalAuth } from '@/contexts/OptimalAuthContext';
 
 export default function HomeScreen() {
+  const { user } = useOptimalAuth();
+
+  // Render different content based on user role
+  if (user?.role === 'pro') {
+    // Import and render professional dashboard
+    return <ProfessionalDashboard />;
+  }
+
+  // Default to client interface
+  return <ClientHomeScreen />;
+}
+
+// Professional Dashboard Component
+function ProfessionalDashboard() {
+  const { user } = useOptimalAuth();
+
+  // Mock data for professional dashboard
+  const stats = {
+    thisMonth: {
+      earnings: 2450,
+      jobs: 12,
+      newClients: 8,
+      rating: 4.8
+    },
+    thisWeek: {
+      viewsOnProfile: 45,
+      messagesReceived: 18,
+      jobApplications: 6,
+      bookings: 3
+    }
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+        {/* Professional Dashboard Content */}
+        <View style={styles.section}>
+          <Text style={styles.welcomeText}>Bună ziua, {user?.name}!</Text>
+          <Text style={styles.subtitle}>Dashboard Profesional</Text>
+          
+          <View style={styles.statsGrid}>
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>{stats.thisMonth.earnings} LEI</Text>
+              <Text style={styles.statLabel}>Luna aceasta</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>{stats.thisMonth.jobs}</Text>
+              <Text style={styles.statLabel}>Job-uri</Text>
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+// Client Home Screen Component  
+function ClientHomeScreen() {
   const [selectedRegion, setSelectedRegion] = useState<any>(null);
   
   const { data: categories } = trpc.profiles.getCategories.useQuery();
@@ -494,5 +553,45 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     marginRight: 8,
+  },
+  
+  // Professional Dashboard Styles
+  welcomeText: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#1F2937',
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#6B7280',
+    marginBottom: 24,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  statValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#F59E0B',
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 14,
+    color: '#6B7280',
+    textAlign: 'center',
   },
 });
