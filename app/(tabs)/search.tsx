@@ -268,19 +268,8 @@ export default function SearchScreen() {
       {/* Results */}
       <ScrollView style={styles.resultsContainer} showsVerticalScrollIndicator={false}>
         <View style={styles.resultsHeader}>
-          <Text style={styles.resultsTitle}>
-            {sortedProfiles.length} Profesionist{sortedProfiles.length !== 1 ? 'i' : ''} Găsiți
-          </Text>
-          {selectedCategory && (
-            <Text style={styles.resultsSubtitle}>
-              în serviciile de {selectedCategory}
-            </Text>
-          )}
-          {selectedArea && (
-            <Text style={styles.resultsSubtitle}>
-              în zona {selectedArea}
-            </Text>
-          )}
+          <Text style={styles.resultsTitle}>Rezultate</Text>
+          <Text style={styles.resultsCount}>{sortedProfiles.length} profesioniști găsiți</Text>
         </View>
 
         {sortedProfiles.length === 0 ? (
@@ -448,6 +437,10 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#1F2937',
     marginBottom: 4,
+  },
+  resultsCount: {
+    fontSize: 14,
+    color: '#6B7280',
   },
   resultsSubtitle: {
     fontSize: 14,
