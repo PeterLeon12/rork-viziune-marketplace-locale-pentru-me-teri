@@ -197,7 +197,7 @@ export default function PostJobScreen() {
                   styles.urgencyOption,
                   formData.urgency === option.value && styles.urgencyOptionSelected
                 ]}
-                onPress={() => setFormData({ ...formData, urgency: option.value })}
+                onPress={() => setFormData({ ...formData, urgency: option.value as 'low' | 'normal' | 'high' })}
               >
                 <IconComponent size={20} color={formData.urgency === option.value ? '#FFFFFF' : option.color} />
                 <Text style={[

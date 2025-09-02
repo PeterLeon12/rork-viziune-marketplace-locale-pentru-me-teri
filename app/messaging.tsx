@@ -14,13 +14,9 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { 
   ArrowLeft, 
   Send, 
-  Image as ImageIcon,
   Paperclip,
   MoreVertical,
-  Phone,
   MessageCircle,
-  MapPin,
-  Clock,
 } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import { trpc } from '@/lib/trpc';
@@ -40,8 +36,8 @@ interface Conversation {
   clientId: string;
   proId: string;
   jobId: string;
-  lastMessage?: string;
-  lastMessageAt?: string;
+  lastMessage?: string | null;
+  lastMessageAt?: string | null;
   createdAt: string;
 }
 
@@ -59,7 +55,7 @@ export default function MessagingScreen() {
       setConversation(data);
       // Fetch messages for this conversation
       if (data.id) {
-        fetchMessages(data.id);
+        fetchMessages();
       }
     },
     onError: (error) => {

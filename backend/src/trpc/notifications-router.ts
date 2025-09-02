@@ -77,7 +77,7 @@ export const notificationsRouter = createTRPCRouter({
       title: z.string(),
       body: z.string(),
       type: z.enum(['job_update', 'message', 'application', 'booking', 'payment']),
-      data: z.record(z.any()).optional(),
+      data: z.record(z.string(), z.any()).optional(),
     }))
     .mutation(async ({ input }) => {
       try {

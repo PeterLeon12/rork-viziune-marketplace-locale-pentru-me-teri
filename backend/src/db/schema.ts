@@ -169,6 +169,82 @@ export const notifications = pgTable('notifications', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
+// Enhanced Professional Profile Tables
+
+// Professional skills table
+export const professionalSkills = pgTable('professional_skills', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  proId: uuid('pro_id').notNull().references(() => proProfiles.id, { onDelete: 'cascade' }),
+  skillName: text('skill_name').notNull(),
+  skillLevel: text('skill_level', { enum: ['beginner', 'intermediate', 'advanced', 'expert'] }).notNull(),
+  yearsExperience: integer('years_experience').default(0),
+  verified: boolean('verified').default(false),
+  verificationMethod: text('verification_method'), // 'certificate', 'portfolio', 'client_review', 'test'
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+// Professional availability table
+export const professionalAvailability = pgTable('professional_availability', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  proId: uuid('pro_id').notNull().references(() => proProfiles.id, { onDelete: 'cascade' }),
+  date: timestamp('date').notNull(),
+  timeSlot: text('time_slot').notNull(),
+  available: boolean('available').default(true),
+  booked: boolean('booked').default(false),
+  bookingId: uuid('booking_id').references(() => bookings.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+// Professional portfolio table
+export const professionalPortfolio = pgTable('professional_portfolio', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  proId: uuid('pro_id').notNull().references(() => proProfiles.id, { onDelete: 'cascade' }),
+  title: text('title').notNull(),
+  description: text('description').notNull(),
+  images: text('images').array().default([]),
+  projectDate: timestamp('project_date'),
+  clientTestimonial: text('client_testimonial'),
+  projectValue: integer('project_value'),
+  durationDays: integer('duration_days'),
+  categoryId: text('category_id').references(() => categories.id),
+  tags: text('tags').array().default([]),
+  visible: boolean('visible').default(true),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+// Service packages table for tiered pricing
+export const servicePackages = pgTable('service_packages', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  proId: uuid('pro_id').notNull().references(() => proProfiles.id, { onDelete: 'cascade' }),
+  serviceId: uuid('service_id').references(() => services.id, { onDelete: 'cascade' }),
+  packageName: text('package_name').notNull(), // 'basic', 'standard', 'premium'
+  packageDescription: text('package_description').notNull(),
+  price: integer('price').notNull(),
+  durationHours: integer('duration_hours'),
+  includes: text('includes').array().default([]),
+  excludes: text('excludes').array().default([]),
+  popular: boolean('popular').default(false),
+  active: boolean('active').default(true),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+// Professional certifications table
+export const professionalCertifications = pgTable('professional_certifications', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  proId: uuid('pro_id').notNull().references(() => proProfiles.id, { onDelete: 'cascade' }),
+  certificationName: text('certification_name').notNull(),
+  issuingOrganization: text('issuing_organization').notNull(),
+  issueDate: timestamp('issue_date'),
+  expiryDate: timestamp('expiry_date'),
+  certificateUrl: text('certificate_url'),
+  verified: boolean('verified').default(false),
+  verificationDate: timestamp('verification_date'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   proProfile: many(proProfiles),

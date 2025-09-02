@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure, protectedProcedure } from './create-context';
 import { db } from '../db';
-import { users, bookings, jobApplications } from '../db/schema';
+import { users, bookings, jobs } from '../db/schema';
 import { eq } from 'drizzle-orm';
 
 // Mock Stripe integration - replace with real Stripe SDK
@@ -134,7 +134,7 @@ export const paymentsRouter = createTRPCRouter({
         );
 
         // Update user role based on plan
-        const planRoleMap: Record<string, string> = {
+        const planRoleMap: Record<string, 'client' | 'pro' | 'admin'> = {
           'basic': 'pro',
           'premium': 'pro',
           'enterprise': 'pro',

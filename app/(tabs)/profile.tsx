@@ -163,7 +163,7 @@ export default function ProfileScreen() {
           <View style={styles.demoNoteContainer}>
             <AlertCircle size={16} color="#F59E0B" />
             <Text style={styles.demoNote}>
-              Demo: Folosește codul OTP "123456"
+              Demo: Folosește codul OTP &quot;123456&quot;
             </Text>
           </View>
         </View>

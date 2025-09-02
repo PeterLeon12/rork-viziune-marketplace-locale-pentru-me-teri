@@ -91,7 +91,7 @@ export default function SubscriptionScreen() {
     }
   };
 
-  const getPlanGradient = (planId: string) => {
+  const getPlanGradient = (planId: string): [string, string] => {
     switch (planId) {
       case 'free':
         return ['#F3F4F6', '#E5E7EB'];
@@ -104,6 +104,16 @@ export default function SubscriptionScreen() {
       default:
         return ['#F3F4F6', '#E5E7EB'];
     }
+  };
+
+  // Helper function to check if plan has limitations
+  const hasLimitations = (plan: any): plan is { limitations: string[] } => {
+    return 'limitations' in plan && Array.isArray(plan.limitations);
+  };
+
+  // Helper function to check if plan has period and commission
+  const hasPeriodAndCommission = (plan: any): plan is { period: string; commission: string } => {
+    return 'period' in plan && 'commission' in plan;
   };
 
   if (isLoading) {
@@ -163,7 +173,7 @@ export default function SubscriptionScreen() {
                   {plan.price > 0 && (
                     <Text style={styles.currency}>RON</Text>
                   )}
-                  {plan.period && (
+                  {('period' in plan) && (
                     <Text style={styles.period}>/{plan.period}</Text>
                   )}
                 </View>
@@ -181,10 +191,10 @@ export default function SubscriptionScreen() {
                   </View>
                 ))}
 
-                {plan.limitations && plan.limitations.length > 0 && (
+                {('limitations' in plan) && plan.limitations && plan.limitations.length > 0 && (
                   <>
                     <Text style={styles.limitationsTitle}>Limitări:</Text>
-                    {plan.limitations.map((limitation, index) => (
+                    {plan.limitations.map((limitation: string, index: number) => (
                       <View key={index} style={styles.limitationRow}>
                         <Text style={styles.limitationText}>• {limitation}</Text>
                       </View>
@@ -192,7 +202,7 @@ export default function SubscriptionScreen() {
                   </>
                 )}
 
-                {plan.commission && (
+                {('commission' in plan) && (
                   <View style={styles.commissionContainer}>
                     <Text style={styles.commissionText}>
                       Comision: {plan.commission}

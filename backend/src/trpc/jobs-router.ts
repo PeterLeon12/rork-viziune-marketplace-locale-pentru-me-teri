@@ -123,7 +123,7 @@ export const jobsRouter = createTRPCRouter({
         .where(
           and(
             eq(jobApplications.jobId, input.jobId),
-            eq(jobApplications.artisanId, artisanProfile[0].id)
+            eq(jobApplications.proId, artisanProfile[0].id)
           )
         )
         .limit(1);
@@ -134,11 +134,11 @@ export const jobsRouter = createTRPCRouter({
 
       const newApplication = await db.insert(jobApplications).values({
         jobId: input.jobId,
-        artisanId: artisanProfile[0].id,
+        proId: artisanProfile[0].id,
         message: input.message,
-        proposedPrice: input.proposedPrice,
-        estimatedDuration: input.estimatedDuration,
-      }).returning();
+        price: input.proposedPrice,
+        estimatedTime: input.estimatedDuration,
+      } as any).returning();
 
       return newApplication[0];
     }),
@@ -153,8 +153,8 @@ export const jobsRouter = createTRPCRouter({
         .select({
           id: jobApplications.id,
           message: jobApplications.message,
-          proposedPrice: jobApplications.proposedPrice,
-          estimatedDuration: jobApplications.estimatedDuration,
+          price: jobApplications.price,
+          estimatedTime: jobApplications.estimatedTime,
           status: jobApplications.status,
           createdAt: jobApplications.createdAt,
           artisan: {
@@ -168,7 +168,7 @@ export const jobsRouter = createTRPCRouter({
           },
         })
         .from(jobApplications)
-        .innerJoin(proProfiles, eq(jobApplications.artisanId, proProfiles.id))
+        .innerJoin(proProfiles, eq(jobApplications.proId, proProfiles.id))
         .where(eq(jobApplications.jobId, input.jobId))
         .orderBy(desc(jobApplications.createdAt));
 
@@ -180,8 +180,7 @@ export const jobsRouter = createTRPCRouter({
     .input(z.object({
       applicationId: z.string(),
       scheduledDate: z.date(),
-      duration: z.number().min(30).max(480), // 30 minutes to 8 hours
-      price: z.number().min(0),
+      totalPrice: z.number().min(0),
       notes: z.string().optional(),
     }))
     .mutation(async ({ input, ctx }) => {
@@ -190,7 +189,7 @@ export const jobsRouter = createTRPCRouter({
         .select({
           id: jobApplications.id,
           jobId: jobApplications.jobId,
-          artisanId: jobApplications.artisanId,
+          proId: jobApplications.proId,
           job: {
             clientId: jobs.clientId,
             title: jobs.title,
@@ -212,11 +211,10 @@ export const jobsRouter = createTRPCRouter({
       // Create booking
       const newBooking = await db.insert(bookings).values({
         jobId: application[0].jobId,
-        artisanId: application[0].artisanId,
+        proId: application[0].proId,
         clientId: ctx.user.userId,
         scheduledDate: input.scheduledDate,
-        duration: input.duration,
-        price: input.price,
+        totalPrice: input.totalPrice,
         notes: input.notes,
       }).returning();
 
@@ -287,7 +285,7 @@ export const jobsRouter = createTRPCRouter({
         throw new Error('Artisan profile not found');
       }
 
-      let conditions = [eq(jobApplications.artisanId, artisanProfile[0].id)];
+      let conditions = [eq(jobApplications.proId, artisanProfile[0].id)];
       
       if (input.status) {
         conditions.push(eq(jobApplications.status, input.status));
@@ -297,8 +295,8 @@ export const jobsRouter = createTRPCRouter({
         .select({
           id: jobApplications.id,
           message: jobApplications.message,
-          proposedPrice: jobApplications.proposedPrice,
-          estimatedDuration: jobApplications.estimatedDuration,
+          price: jobApplications.price,
+          estimatedTime: jobApplications.estimatedTime,
           status: jobApplications.status,
           createdAt: jobApplications.createdAt,
           job: {
