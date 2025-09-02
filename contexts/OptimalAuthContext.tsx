@@ -454,13 +454,19 @@ export const [OptimalAuthProvider, useOptimalAuth] = createContextHook<OptimalAu
 
   const switchRole = useCallback(async (newRole: 'client' | 'pro'): Promise<void> => {
     try {
-      if (!authState.user) throw new Error('Nu există utilizator autentificat');
-      if (authState.user.role === newRole) throw new Error('Utilizatorul are deja acest rol');
+      setAuthState(prev => {
+        if (!prev.user) throw new Error('Nu există utilizator autentificat');
+        if (prev.user.role === newRole) throw new Error('Utilizatorul are deja acest rol');
+        
+        return { ...prev, isLoading: true };
+      });
 
-      setAuthState(prev => ({ ...prev, isLoading: true }));
+      const currentUser = authState.user;
+      if (!currentUser) throw new Error('Nu există utilizator autentificat');
+      if (currentUser.role === newRole) throw new Error('Utilizatorul are deja acest rol');
 
       const updatedUser = {
-        ...authState.user,
+        ...currentUser,
         role: newRole,
       };
 
@@ -481,7 +487,7 @@ export const [OptimalAuthProvider, useOptimalAuth] = createContextHook<OptimalAu
       setAuthState(prev => ({ ...prev, isLoading: false }));
       throw new Error(error.message || 'Nu am putut schimba rolul');
     }
-  }, [authState.user]);
+  }, []);
 
   const resetAuth = useCallback(() => {
     setAuthState({
@@ -512,7 +518,11 @@ export const [OptimalAuthProvider, useOptimalAuth] = createContextHook<OptimalAu
     setAuthMode,
     resetAuth,
   }), [
-    authState,
+    authState.user,
+    authState.isLoading,
+    authState.isAuthenticated,
+    authState.authMode,
+    authState.needsOnboarding,
     login,
     register,
     logout,
