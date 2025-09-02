@@ -13,8 +13,6 @@ const t = initTRPC.context<Context>().create();
 // Export router, public and protected procedures
 export const createTRPCRouter = t.router;
 export const publicProcedure = t.procedure;
-
-// Protected procedure that requires authentication
 export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
   if (!ctx.user) {
     throw new TRPCError({
