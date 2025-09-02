@@ -23,7 +23,7 @@ import {
   XCircle,
   MoreVertical
 } from 'lucide-react-native';
-import { useAuth } from '@/contexts/AuthContext';
+import { useOptimalAuth } from '@/contexts/OptimalAuthContext';
 import { trpc } from '@/lib/trpc';
 
 interface Job {
@@ -42,7 +42,7 @@ interface Job {
 
 export default function JobsScreen() {
   const [activeTab, setActiveTab] = useState('posted');
-  const { user } = useAuth();
+  const { user } = useOptimalAuth();
   
   // Get user's jobs from backend
   const { data: backendJobs, isLoading, error, refetch } = trpc.jobs.getMyJobs.useQuery({ 

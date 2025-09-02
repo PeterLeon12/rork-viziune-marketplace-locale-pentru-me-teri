@@ -77,8 +77,6 @@ export default function TabLayout() {
         />
 
         {/* Hide other screens from professional tabs */}
-        <Tabs.Screen name="enhanced-profile" options={{ href: null }} />
-        <Tabs.Screen name="profile" options={{ href: null }} />
         <Tabs.Screen name="search" options={{ href: null }} />
         <Tabs.Screen name="post-job" options={{ href: null }} />
       </Tabs>
@@ -162,9 +160,7 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Hide other screens from client tabs */}
-      <Tabs.Screen name="enhanced-profile" options={{ href: null }} />
-      <Tabs.Screen name="profile" options={{ href: null }} />
+      {/* No hidden screens needed for client tabs */}
     </Tabs>
   );
 }

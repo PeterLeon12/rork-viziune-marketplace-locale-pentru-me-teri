@@ -18,7 +18,7 @@ import {
   MoreVertical,
   MessageCircle,
 } from 'lucide-react-native';
-import { useAuth } from '@/contexts/AuthContext';
+import { useOptimalAuth } from '@/contexts/OptimalAuthContext';
 import { trpc } from '@/lib/trpc';
 
 interface Message {
@@ -42,7 +42,7 @@ interface Conversation {
 }
 
 export default function MessagingScreen() {
-  const { user } = useAuth();
+  const { user } = useOptimalAuth();
   const params = useLocalSearchParams();
   const [message, setMessage] = useState('');
   const [conversation, setConversation] = useState<Conversation | null>(null);

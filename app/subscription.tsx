@@ -21,10 +21,10 @@ import {
   Zap
 } from 'lucide-react-native';
 import { trpc } from '@/lib/trpc';
-import { useAuth } from '@/contexts/AuthContext';
+import { useOptimalAuth } from '@/contexts/OptimalAuthContext';
 
 export default function SubscriptionScreen() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useOptimalAuth();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [isSubscribing, setIsSubscribing] = useState(false);
 

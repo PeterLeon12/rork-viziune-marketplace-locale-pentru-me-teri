@@ -21,13 +21,15 @@ import {
   CheckCircle,
   AlertCircle
 } from 'lucide-react-native';
-import { useAppStore } from '@/store/useAppStore';
 import { trpc } from '@/lib/trpc';
-import { useAuth } from '@/contexts/AuthContext';
+import { useOptimalAuth } from '@/contexts/OptimalAuthContext';
 
 export default function PostJobScreen() {
-  const { user, isAuthenticated } = useAuth();
-  const { categories, areas } = useAppStore();
+  const { user, isAuthenticated } = useOptimalAuth();
+  
+  // Get categories and areas from backend
+  const { data: categories = [] } = trpc.profiles.getCategories.useQuery();
+  const { data: areas = [] } = trpc.profiles.getAreas.useQuery();
   const [formData, setFormData] = useState({
     title: '',
     description: '',

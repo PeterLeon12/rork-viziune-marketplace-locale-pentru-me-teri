@@ -278,6 +278,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F8FAFC',
   },
+  scrollContainer: {
+    flex: 1,
+  },
+  section: {
+    paddingHorizontal: 24,
+    marginBottom: 32,
+  },
   heroSection: {
     paddingTop: 60,
     paddingBottom: 40,
