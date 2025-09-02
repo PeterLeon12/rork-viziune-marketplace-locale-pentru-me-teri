@@ -16,11 +16,16 @@ export default function SearchTabScreen() {
     performSearch,
   } = useAppStore();
 
+  // Fetch areas for the search
+  const { data: areas = [] } = trpc.profiles.getAreas.useQuery();
+
   // Fetch search results from backend
   const { data: searchResults, isLoading } = trpc.profiles.searchProfiles.useQuery({
-    query: searchQuery,
-    category: selectedCategory,
-    area: selectedArea,
+    query: searchQuery || undefined,
+    category: selectedCategory || undefined,
+    area: selectedArea || undefined,
+  }, {
+    enabled: true, // Always enabled to show results
   });
 
   const handleAreaPress = () => {
@@ -29,8 +34,9 @@ export default function SearchTabScreen() {
   };
 
   const handleSearch = () => {
-    performSearch();
-    router.push('/search');
+    // The search is now handled automatically by the tRPC query
+    // which updates when searchQuery, selectedCategory, or selectedArea changes
+    console.log('Search triggered with:', { searchQuery, selectedCategory, selectedArea });
   };
 
   const handleProPress = (proId: string) => {

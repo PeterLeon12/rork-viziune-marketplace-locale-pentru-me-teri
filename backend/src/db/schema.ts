@@ -78,6 +78,52 @@ export const areas = pgTable('areas', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
+// Jobs table (posted by clients)
+export const jobs = pgTable('jobs', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  clientId: uuid('client_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  title: text('title').notNull(),
+  description: text('description').notNull(),
+  category: text('category').notNull(),
+  area: text('area').notNull(),
+  budget: integer('budget'), // in RON
+  urgency: text('urgency', { enum: ['low', 'medium', 'high', 'urgent'] }).notNull().default('medium'),
+  status: text('status', { enum: ['open', 'in_progress', 'completed', 'cancelled'] }).notNull().default('open'),
+  photos: text('photos').array(), // URLs to uploaded photos
+  location: jsonb('location'), // { address: string, lat: number, lng: number }
+  scheduledDate: timestamp('scheduled_date'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+// Job applications table (artisans applying to jobs)
+export const jobApplications = pgTable('job_applications', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  jobId: uuid('job_id').notNull().references(() => jobs.id, { onDelete: 'cascade' }),
+  artisanId: uuid('artisan_id').notNull().references(() => proProfiles.id, { onDelete: 'cascade' }),
+  message: text('message').notNull(),
+  proposedPrice: integer('proposed_price'), // in RON
+  estimatedDuration: text('estimated_duration'), // e.g., "2 hours", "1 day"
+  status: text('status', { enum: ['pending', 'accepted', 'rejected'] }).notNull().default('pending'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+// Bookings table (confirmed appointments)
+export const bookings = pgTable('bookings', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  jobId: uuid('job_id').notNull().references(() => jobs.id, { onDelete: 'cascade' }),
+  artisanId: uuid('artisan_id').notNull().references(() => proProfiles.id, { onDelete: 'cascade' }),
+  clientId: uuid('client_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  scheduledDate: timestamp('scheduled_date').notNull(),
+  duration: integer('duration'), // in minutes
+  price: integer('price').notNull(), // in RON
+  status: text('status', { enum: ['scheduled', 'in_progress', 'completed', 'cancelled'] }).notNull().default('scheduled'),
+  notes: text('notes'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
 // OTP verification table
 export const otpVerifications = pgTable('otp_verifications', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -92,6 +138,8 @@ export const otpVerifications = pgTable('otp_verifications', {
 export const usersRelations = relations(users, ({ many }) => ({
   proProfile: many(proProfiles),
   reviews: many(reviews),
+  jobs: many(jobs),
+  bookings: many(bookings),
 }));
 
 export const proProfilesRelations = relations(proProfiles, ({ one, many }) => ({
@@ -101,6 +149,8 @@ export const proProfilesRelations = relations(proProfiles, ({ one, many }) => ({
   }),
   services: many(services),
   reviews: many(reviews),
+  jobApplications: many(jobApplications),
+  bookings: many(bookings),
 }));
 
 export const servicesRelations = relations(services, ({ one }) => ({
@@ -117,6 +167,41 @@ export const reviewsRelations = relations(reviews, ({ one }) => ({
   }),
   client: one(users, {
     fields: [reviews.clientId],
+    references: [users.id],
+  }),
+}));
+
+export const jobsRelations = relations(jobs, ({ one, many }) => ({
+  client: one(users, {
+    fields: [jobs.clientId],
+    references: [users.id],
+  }),
+  applications: many(jobApplications),
+  bookings: many(bookings),
+}));
+
+export const jobApplicationsRelations = relations(jobApplications, ({ one }) => ({
+  job: one(jobs, {
+    fields: [jobApplications.jobId],
+    references: [jobs.id],
+  }),
+  artisan: one(proProfiles, {
+    fields: [jobApplications.artisanId],
+    references: [proProfiles.id],
+  }),
+}));
+
+export const bookingsRelations = relations(bookings, ({ one }) => ({
+  job: one(jobs, {
+    fields: [bookings.jobId],
+    references: [jobs.id],
+  }),
+  artisan: one(proProfiles, {
+    fields: [bookings.artisanId],
+    references: [proProfiles.id],
+  }),
+  client: one(users, {
+    fields: [bookings.clientId],
     references: [users.id],
   }),
 }));

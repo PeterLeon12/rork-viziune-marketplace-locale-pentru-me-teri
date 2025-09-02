@@ -1,20 +1,30 @@
 import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet, Text } from 'react-native';
-import { Search, MapPin } from 'lucide-react-native';
+import { Search } from 'lucide-react-native';
+import RegionSelector from './RegionSelector';
+
+interface Region {
+  id: string;
+  name: string;
+  city: string;
+  county: string;
+}
 
 interface SearchBarProps {
   query: string;
   onQueryChange: (query: string) => void;
-  selectedArea: string | null;
-  onAreaPress: () => void;
+  selectedRegion: Region | null;
+  onRegionSelect: (region: Region) => void;
+  regions: Region[];
   onSearch: () => void;
 }
 
 export default function SearchBar({ 
   query, 
   onQueryChange, 
-  selectedArea, 
-  onAreaPress, 
+  selectedRegion, 
+  onRegionSelect,
+  regions,
   onSearch 
 }: SearchBarProps) {
   return (
@@ -31,14 +41,15 @@ export default function SearchBar({
             returnKeyType="search"
           />
         </View>
-        
-        <TouchableOpacity style={styles.locationContainer} onPress={onAreaPress}>
-          <MapPin size={16} color="#6B7280" />
-          <Text style={styles.locationText} numberOfLines={1}>
-            {selectedArea || 'Alege zona'}
-          </Text>
-        </TouchableOpacity>
       </View>
+      
+      {regions && regions.length > 0 && (
+        <RegionSelector
+          selectedRegion={selectedRegion}
+          onRegionSelect={onRegionSelect}
+          regions={regions}
+        />
+      )}
       
       <TouchableOpacity style={styles.searchButton} onPress={onSearch}>
         <Search size={20} color="white" />
@@ -68,8 +79,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 12,
     paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
   },
   searchIcon: {
     marginRight: 8,
@@ -78,18 +87,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: '#1E293B',
-  },
-  locationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  locationText: {
-    fontSize: 14,
-    color: '#64748B',
-    marginLeft: 6,
-    flex: 1,
   },
   searchButton: {
     backgroundColor: '#3B82F6',

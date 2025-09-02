@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,34 +10,53 @@ import {
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppStore } from '@/store/useAppStore';
-import { areas } from '@/constants/data';
 import CategoryCard from '@/components/CategoryCard';
 import SearchBar from '@/components/SearchBar';
 import { Category } from '@/types';
 import { trpc } from '@/lib/trpc';
+import { Plus, Briefcase } from 'lucide-react-native';
 
 export default function HomeScreen() {
   const {
     searchQuery,
     selectedCategory,
     selectedArea,
+    categories,
+    areas,
     setSearchQuery,
     setSelectedCategory,
     setSelectedArea,
+    setCategories,
+    setAreas,
     performSearch,
   } = useAppStore();
 
-  // Fetch categories from backend
-  const { data: categories = [], isLoading: categoriesLoading } = trpc.profiles.getCategories.useQuery();
+  const [selectedRegion, setSelectedRegion] = useState<any>(null);
+
+  // Fetch categories and areas from backend
+  const { data: categoriesData = [], isLoading: categoriesLoading } = trpc.profiles.getCategories.useQuery();
+  const { data: areasData = [], isLoading: areasLoading } = trpc.profiles.getAreas.useQuery();
+
+  // Update store when data is fetched
+  React.useEffect(() => {
+    if (categoriesData.length > 0) {
+      setCategories(categoriesData);
+    }
+  }, [categoriesData, setCategories]);
+
+  React.useEffect(() => {
+    if (areasData.length > 0) {
+      setAreas(areasData);
+    }
+  }, [areasData, setAreas]);
 
   const handleCategoryPress = (category: Category) => {
     setSelectedCategory(category.id);
   };
 
-  const handleAreaPress = () => {
-    // In a real app, this would open an area selection modal
-    const randomArea = areas[Math.floor(Math.random() * areas.length)];
-    setSelectedArea(randomArea.name);
+  const handleRegionSelect = (region: any) => {
+    setSelectedRegion(region);
+    setSelectedArea(region.name);
   };
 
   const handleSearch = () => {
@@ -53,7 +72,7 @@ export default function HomeScreen() {
       >
         <View style={styles.headerContent}>
           <Text style={styles.title}>
-            Găsește un meșter de încredere în Cluj-Napoca
+            Găsește meșteri de încredere în toată România
           </Text>
           <Text style={styles.subtitle}>
             Compară profiluri, citește recenzii și contactează direct
@@ -64,10 +83,32 @@ export default function HomeScreen() {
       <SearchBar
         query={searchQuery}
         onQueryChange={setSearchQuery}
-        selectedArea={selectedArea}
-        onAreaPress={handleAreaPress}
+        selectedRegion={selectedRegion}
+        onRegionSelect={handleRegionSelect}
+        regions={areas}
         onSearch={handleSearch}
       />
+
+      {/* Quick Actions */}
+      <View style={styles.quickActions}>
+        <TouchableOpacity 
+          style={styles.actionButton}
+          onPress={() => router.push('/post-job')}
+        >
+          <Plus size={20} color="white" />
+          <Text style={styles.actionButtonText}>Postează Job</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={[styles.actionButton, styles.secondaryActionButton]}
+          onPress={() => router.push('/jobs')}
+        >
+          <Briefcase size={20} color="#3B82F6" />
+          <Text style={[styles.actionButtonText, styles.secondaryActionButtonText]}>
+            Vezi Job-uri
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.section}>
@@ -169,6 +210,36 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'rgba(255, 255, 255, 0.9)',
     textAlign: 'center',
+  },
+  quickActions: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    gap: 12,
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#3B82F6',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    gap: 8,
+  },
+  secondaryActionButton: {
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#3B82F6',
+  },
+  actionButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  secondaryActionButtonText: {
+    color: '#3B82F6',
   },
   content: {
     flex: 1,

@@ -20,7 +20,7 @@ function RootLayoutNav() {
   );
 }
 
-export default function RootLayout() {
+function RootLayoutInner() {
   useEffect(() => {
     SplashScreen.hideAsync();
   }, []);
@@ -39,3 +39,5 @@ export default function RootLayout() {
     </ErrorBoundary>
   );
 }
+
+export default RootLayoutInner;

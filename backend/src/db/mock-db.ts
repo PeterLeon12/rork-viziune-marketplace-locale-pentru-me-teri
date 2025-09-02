@@ -11,13 +11,191 @@ const categories = [
 ];
 
 const areas = [
-  { id: '1', name: 'Mănăștur', city: 'Cluj-Napoca' },
-  { id: '2', name: 'Gheorgheni', city: 'Cluj-Napoca' },
-  { id: '3', name: 'Zorilor', city: 'Cluj-Napoca' },
-  { id: '4', name: 'Mărăști', city: 'Cluj-Napoca' },
-  { id: '5', name: 'Grigorescu', city: 'Cluj-Napoca' },
-  { id: '6', name: 'Florești', city: 'Cluj-Napoca' },
-  { id: '7', name: 'Centru', city: 'Cluj-Napoca' },
+  // Cluj County
+  { id: '1', name: 'Cluj-Napoca', city: 'Cluj-Napoca', county: 'Cluj' },
+  { id: '2', name: 'Turda', city: 'Turda', county: 'Cluj' },
+  { id: '3', name: 'Dej', city: 'Dej', county: 'Cluj' },
+  { id: '4', name: 'Gherla', city: 'Gherla', county: 'Cluj' },
+  
+  // Bucharest
+  { id: '5', name: 'Sector 1', city: 'București', county: 'București' },
+  { id: '6', name: 'Sector 2', city: 'București', county: 'București' },
+  { id: '7', name: 'Sector 3', city: 'București', county: 'București' },
+  { id: '8', name: 'Sector 4', city: 'București', county: 'București' },
+  { id: '9', name: 'Sector 5', city: 'București', county: 'București' },
+  { id: '10', name: 'Sector 6', city: 'București', county: 'București' },
+  
+  // Timiș County
+  { id: '11', name: 'Timișoara', city: 'Timișoara', county: 'Timiș' },
+  { id: '12', name: 'Lugoj', city: 'Lugoj', county: 'Timiș' },
+  { id: '13', name: 'Sânnicolau Mare', city: 'Sânnicolau Mare', county: 'Timiș' },
+  
+  // Constanța County
+  { id: '14', name: 'Constanța', city: 'Constanța', county: 'Constanța' },
+  { id: '15', name: 'Mangalia', city: 'Mangalia', county: 'Constanța' },
+  { id: '16', name: 'Medgidia', city: 'Medgidia', county: 'Constanța' },
+  
+  // Iași County
+  { id: '17', name: 'Iași', city: 'Iași', county: 'Iași' },
+  { id: '18', name: 'Pașcani', city: 'Pașcani', county: 'Iași' },
+  { id: '19', name: 'Târgu Frumos', city: 'Târgu Frumos', county: 'Iași' },
+  
+  // Brașov County
+  { id: '20', name: 'Brașov', city: 'Brașov', county: 'Brașov' },
+  { id: '21', name: 'Făgăraș', city: 'Făgăraș', county: 'Brașov' },
+  { id: '22', name: 'Săcele', city: 'Săcele', county: 'Brașov' },
+  
+  // Dolj County
+  { id: '23', name: 'Craiova', city: 'Craiova', county: 'Dolj' },
+  { id: '24', name: 'Băilești', city: 'Băilești', county: 'Dolj' },
+  { id: '25', name: 'Calafat', city: 'Calafat', county: 'Dolj' },
+  
+  // Galați County
+  { id: '26', name: 'Galați', city: 'Galați', county: 'Galați' },
+  { id: '27', name: 'Tecuci', city: 'Tecuci', county: 'Galați' },
+  
+  // Mureș County
+  { id: '28', name: 'Târgu Mureș', city: 'Târgu Mureș', county: 'Mureș' },
+  { id: '29', name: 'Reghin', city: 'Reghin', county: 'Mureș' },
+  { id: '30', name: 'Sighișoara', city: 'Sighișoara', county: 'Mureș' },
+  
+  // Argeș County
+  { id: '31', name: 'Pitești', city: 'Pitești', county: 'Argeș' },
+  { id: '32', name: 'Câmpulung', city: 'Câmpulung', county: 'Argeș' },
+  { id: '33', name: 'Curtea de Argeș', city: 'Curtea de Argeș', county: 'Argeș' },
+  
+  // Prahova County
+  { id: '34', name: 'Ploiești', city: 'Ploiești', county: 'Prahova' },
+  { id: '35', name: 'Câmpina', city: 'Câmpina', county: 'Prahova' },
+  { id: '36', name: 'Azuga', city: 'Azuga', county: 'Prahova' },
+  
+  // Bihor County
+  { id: '37', name: 'Oradea', city: 'Oradea', county: 'Bihor' },
+  { id: '38', name: 'Salonta', city: 'Salonta', county: 'Bihor' },
+  { id: '39', name: 'Marghita', city: 'Marghita', county: 'Bihor' },
+  
+  // Arad County
+  { id: '40', name: 'Arad', city: 'Arad', county: 'Arad' },
+  { id: '41', name: 'Lipova', city: 'Lipova', county: 'Arad' },
+  { id: '42', name: 'Ineu', city: 'Ineu', county: 'Arad' },
+  
+  // Sibiu County
+  { id: '43', name: 'Sibiu', city: 'Sibiu', county: 'Sibiu' },
+  { id: '44', name: 'Mediaș', city: 'Mediaș', county: 'Sibiu' },
+  { id: '45', name: 'Agnita', city: 'Agnita', county: 'Sibiu' },
+  
+  // Bacău County
+  { id: '46', name: 'Bacău', city: 'Bacău', county: 'Bacău' },
+  { id: '47', name: 'Onești', city: 'Onești', county: 'Bacău' },
+  { id: '48', name: 'Comănești', city: 'Comănești', county: 'Bacău' },
+  
+  // Buzău County
+  { id: '49', name: 'Buzău', city: 'Buzău', county: 'Buzău' },
+  { id: '50', name: 'Râmnicu Sărat', city: 'Râmnicu Sărat', county: 'Buzău' },
+  
+  // Suceava County
+  { id: '51', name: 'Suceava', city: 'Suceava', county: 'Suceava' },
+  { id: '52', name: 'Fălticeni', city: 'Fălticeni', county: 'Suceava' },
+  { id: '53', name: 'Rădăuți', city: 'Rădăuți', county: 'Suceava' },
+  
+  // Neamț County
+  { id: '54', name: 'Piatra Neamț', city: 'Piatra Neamț', county: 'Neamț' },
+  { id: '55', name: 'Roman', city: 'Roman', county: 'Neamț' },
+  { id: '56', name: 'Bicaz', city: 'Bicaz', county: 'Neamț' },
+  
+  // Vâlcea County
+  { id: '57', name: 'Râmnicu Vâlcea', city: 'Râmnicu Vâlcea', county: 'Vâlcea' },
+  { id: '58', name: 'Drăgășani', city: 'Drăgășani', county: 'Vâlcea' },
+  
+  // Hunedoara County
+  { id: '59', name: 'Deva', city: 'Deva', county: 'Hunedoara' },
+  { id: '60', name: 'Hunedoara', city: 'Hunedoara', county: 'Hunedoara' },
+  { id: '61', name: 'Petroșani', city: 'Petroșani', county: 'Hunedoara' },
+  
+  // Alba County
+  { id: '62', name: 'Alba Iulia', city: 'Alba Iulia', county: 'Alba' },
+  { id: '63', name: 'Aiud', city: 'Aiud', county: 'Alba' },
+  { id: '64', name: 'Blaj', city: 'Blaj', county: 'Alba' },
+  
+  // Bistrița-Năsăud County
+  { id: '65', name: 'Bistrița', city: 'Bistrița', county: 'Bistrița-Năsăud' },
+  { id: '66', name: 'Năsăud', city: 'Năsăud', county: 'Bistrița-Năsăud' },
+  
+  // Sălaj County
+  { id: '67', name: 'Zalău', city: 'Zalău', county: 'Sălaj' },
+  { id: '68', name: 'Șimleu Silvaniei', city: 'Șimleu Silvaniei', county: 'Sălaj' },
+  
+  // Maramureș County
+  { id: '69', name: 'Baia Mare', city: 'Baia Mare', county: 'Maramureș' },
+  { id: '70', name: 'Sighetu Marmației', city: 'Sighetu Marmației', county: 'Maramureș' },
+  { id: '71', name: 'Borșa', city: 'Borșa', county: 'Maramureș' },
+  
+  // Satu Mare County
+  { id: '72', name: 'Satu Mare', city: 'Satu Mare', county: 'Satu Mare' },
+  { id: '73', name: 'Carei', city: 'Carei', county: 'Satu Mare' },
+  
+  // Botoșani County
+  { id: '74', name: 'Botoșani', city: 'Botoșani', county: 'Botoșani' },
+  { id: '75', name: 'Dorohoi', city: 'Dorohoi', county: 'Botoșani' },
+  
+  // Vaslui County
+  { id: '76', name: 'Vaslui', city: 'Vaslui', county: 'Vaslui' },
+  { id: '77', name: 'Bârlad', city: 'Bârlad', county: 'Vaslui' },
+  
+  // Vrancea County
+  { id: '78', name: 'Focșani', city: 'Focșani', county: 'Vrancea' },
+  { id: '79', name: 'Adjud', city: 'Adjud', county: 'Vrancea' },
+  
+  // Teleorman County
+  { id: '80', name: 'Alexandria', city: 'Alexandria', county: 'Teleorman' },
+  { id: '81', name: 'Roșiori de Vede', city: 'Roșiori de Vede', county: 'Teleorman' },
+  
+  // Giurgiu County
+  { id: '82', name: 'Giurgiu', city: 'Giurgiu', county: 'Giurgiu' },
+  
+  // Călărași County
+  { id: '83', name: 'Călărași', city: 'Călărași', county: 'Călărași' },
+  
+  // Ialomița County
+  { id: '84', name: 'Slobozia', city: 'Slobozia', county: 'Ialomița' },
+  { id: '85', name: 'Fetești', city: 'Fetești', county: 'Ialomița' },
+  
+  // Brăila County
+  { id: '86', name: 'Brăila', city: 'Brăila', county: 'Brăila' },
+  { id: '87', name: 'Ianca', city: 'Ianca', county: 'Brăila' },
+  
+  // Tulcea County
+  { id: '88', name: 'Tulcea', city: 'Tulcea', county: 'Tulcea' },
+  { id: '89', name: 'Măcin', city: 'Măcin', county: 'Tulcea' },
+  
+  // Covasna County
+  { id: '90', name: 'Sfântu Gheorghe', city: 'Sfântu Gheorghe', county: 'Covasna' },
+  { id: '91', name: 'Târgu Secuiesc', city: 'Târgu Secuiesc', county: 'Covasna' },
+  
+  // Harghita County
+  { id: '92', name: 'Miercurea Ciuc', city: 'Miercurea Ciuc', county: 'Harghita' },
+  { id: '93', name: 'Odorheiu Secuiesc', city: 'Odorheiu Secuiesc', county: 'Harghita' },
+  
+  // Mehedinți County
+  { id: '94', name: 'Drobeta-Turnu Severin', city: 'Drobeta-Turnu Severin', county: 'Mehedinți' },
+  { id: '95', name: 'Orșova', city: 'Orșova', county: 'Mehedinți' },
+  
+  // Gorj County
+  { id: '96', name: 'Târgu Jiu', city: 'Târgu Jiu', county: 'Gorj' },
+  { id: '97', name: 'Motru', city: 'Motru', county: 'Gorj' },
+  
+  // Olt County
+  { id: '98', name: 'Slatina', city: 'Slatina', county: 'Olt' },
+  { id: '99', name: 'Caracal', city: 'Caracal', county: 'Olt' },
+  
+  // Dâmbovița County
+  { id: '100', name: 'Târgoviște', city: 'Târgoviște', county: 'Dâmbovița' },
+  { id: '101', name: 'Moreni', city: 'Moreni', county: 'Dâmbovița' },
+  
+  // Ilfov County
+  { id: '102', name: 'Voluntari', city: 'Voluntari', county: 'Ilfov' },
+  { id: '103', name: 'Buftea', city: 'Buftea', county: 'Ilfov' },
+  { id: '104', name: 'Otopeni', city: 'Otopeni', county: 'Ilfov' },
 ];
 
 const mockProfiles = [
@@ -45,86 +223,149 @@ const mockProfiles = [
   {
     id: '2',
     userId: 'user2',
-    displayName: 'ElectricMaster',
+    displayName: 'ElectricMaster București',
     company: 'ElectricMaster PFA',
     categories: ['2'],
-    zones: ['2', '4', '5'],
-    minPrice: 80,
-    about: 'Electrician autorizat ANRE cu experiență în instalații electrice rezidențiale și comerciale. Intervenții rapide 24/7.',
+    zones: ['5', '6', '7'],
+    minPrice: 150,
+    about: 'Electrician autorizat cu experiență de 15 ani. Specializat în instalații electrice rezidențiale și comerciale.',
     verified: true,
     responseTimeAvgMins: 8,
     ratingAvg: 4.9,
-    ratingCount: 87,
+    ratingCount: 89,
     isActive: true,
     contact: {
-      phone: '+40722345678',
-      whatsappLink: 'https://wa.me/40722345678'
+      phone: '+40721234568',
+      whatsappLink: 'https://wa.me/40721234568'
     },
     photoUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-    createdAt: '2024-02-01T14:30:00Z'
+    createdAt: '2024-01-20T14:30:00Z'
   },
   {
     id: '3',
     userId: 'user3',
-    displayName: 'Service Electrocasnice Cluj',
-    company: 'Service Electrocasnice Cluj',
-    categories: ['3'],
-    zones: ['1', '3', '6'],
-    minPrice: 60,
-    about: 'Reparații și service pentru toate tipurile de electrocasnice. Piese originale și garanție extinsă.',
-    verified: false,
-    responseTimeAvgMins: 25,
-    ratingAvg: 4.6,
-    ratingCount: 45,
+    displayName: 'Timișoara Instalații',
+    company: 'Timișoara Instalații SRL',
+    categories: ['1', '4'],
+    zones: ['11', '12'],
+    minPrice: 100,
+    about: 'Servicii complete de instalații și montaj AC în Timișoara și împrejurimi. Răspundem rapid la solicitări.',
+    verified: true,
+    responseTimeAvgMins: 15,
+    ratingAvg: 4.7,
+    ratingCount: 156,
     isActive: true,
     contact: {
-      phone: '+40723456789',
-      whatsappLink: 'https://wa.me/40723456789'
+      phone: '+40721234569',
+      whatsappLink: 'https://wa.me/40721234569'
     },
-    photoUrl: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face',
-    createdAt: '2024-03-10T09:15:00Z'
+    photoUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
+    createdAt: '2024-02-01T09:15:00Z'
   },
   {
     id: '4',
     userId: 'user4',
-    displayName: 'AC Solutions',
-    company: 'AC Solutions SRL',
-    categories: ['4'],
-    zones: ['2', '3', '4', '7'],
-    minPrice: 200,
-    about: 'Specialiști în montaj, service și întreținere sisteme de climatizare. Parteneri autorizați Daikin, Mitsubishi.',
-    verified: true,
-    responseTimeAvgMins: 15,
-    ratingAvg: 4.7,
-    ratingCount: 92,
+    displayName: 'Constanța Electric',
+    company: 'Constanța Electric PFA',
+    categories: ['2', '3'],
+    zones: ['14', '15'],
+    minPrice: 130,
+    about: 'Electrician cu experiență în zona Constanța. Reparații electrocasnice și instalații electrice.',
+    verified: false,
+    responseTimeAvgMins: 25,
+    ratingAvg: 4.5,
+    ratingCount: 67,
     isActive: true,
     contact: {
-      phone: '+40724567890',
-      whatsappLink: 'https://wa.me/40724567890'
+      phone: '+40721234570',
+      whatsappLink: 'https://wa.me/40721234570'
     },
-    photoUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop&crop=face',
-    createdAt: '2024-01-20T16:45:00Z'
+    photoUrl: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=150&h=150&fit=crop&crop=face',
+    createdAt: '2024-02-10T16:45:00Z'
   },
   {
     id: '5',
     userId: 'user5',
-    displayName: 'Zugravi Profesional',
-    company: 'Zugravi Profesional PFA',
-    categories: ['5'],
-    zones: ['1', '2', '5', '6'],
-    minPrice: 15,
-    about: 'Zugraveli interioare și exterioare cu materiale premium. Consultanță gratuită pentru alegerea culorilor.',
+    displayName: 'Iași Dulgherie',
+    company: 'Iași Dulgherie SRL',
+    categories: ['6'],
+    zones: ['17', '18'],
+    minPrice: 80,
+    about: 'Dulgher cu experiență de 20 de ani. Mobilier la comandă, reparații și montaje.',
     verified: true,
     responseTimeAvgMins: 30,
-    ratingAvg: 4.5,
-    ratingCount: 156,
+    ratingAvg: 4.8,
+    ratingCount: 234,
     isActive: true,
     contact: {
-      phone: '+40725678901',
-      whatsappLink: 'https://wa.me/40725678901'
+      phone: '+40721234571',
+      whatsappLink: 'https://wa.me/40721234571'
     },
-    photoUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
+    photoUrl: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face',
     createdAt: '2024-02-15T11:20:00Z'
+  },
+  {
+    id: '6',
+    userId: 'user6',
+    displayName: 'Brașov Zugraveli',
+    company: 'Brașov Zugraveli PFA',
+    categories: ['5'],
+    zones: ['20', '21'],
+    minPrice: 60,
+    about: 'Zugrav cu experiență în vopsitorii interioare și exterioare. Materiale de calitate.',
+    verified: true,
+    responseTimeAvgMins: 20,
+    ratingAvg: 4.6,
+    ratingCount: 145,
+    isActive: true,
+    contact: {
+      phone: '+40721234572',
+      whatsappLink: 'https://wa.me/40721234572'
+    },
+    photoUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+    createdAt: '2024-02-20T13:10:00Z'
+  },
+  {
+    id: '7',
+    userId: 'user7',
+    displayName: 'Craiova Curățenie',
+    company: 'Craiova Curățenie SRL',
+    categories: ['7'],
+    zones: ['23', '24'],
+    minPrice: 40,
+    about: 'Servicii de curățenie profesională pentru case și birouri. Echipă dedicată și materiale eco.',
+    verified: false,
+    responseTimeAvgMins: 45,
+    ratingAvg: 4.4,
+    ratingCount: 78,
+    isActive: true,
+    contact: {
+      phone: '+40721234573',
+      whatsappLink: 'https://wa.me/40721234573'
+    },
+    photoUrl: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
+    createdAt: '2024-02-25T08:30:00Z'
+  },
+  {
+    id: '8',
+    userId: 'user8',
+    displayName: 'Galați Instalații',
+    company: 'Galați Instalații PFA',
+    categories: ['1', '2'],
+    zones: ['26', '27'],
+    minPrice: 110,
+    about: 'Instalații sanitare și electrice în Galați. Răspundem rapid și oferim garanție.',
+    verified: true,
+    responseTimeAvgMins: 18,
+    ratingAvg: 4.7,
+    ratingCount: 112,
+    isActive: true,
+    contact: {
+      phone: '+40721234574',
+      whatsappLink: 'https://wa.me/40721234574'
+    },
+    photoUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+    createdAt: '2024-03-01T12:00:00Z'
   }
 ];
 
