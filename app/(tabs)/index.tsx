@@ -220,7 +220,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
   },
   heroSection: {
-    backgroundColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     paddingTop: 60,
     paddingBottom: 40,
     paddingHorizontal: 24,
@@ -447,7 +446,6 @@ const styles = StyleSheet.create({
   ctaSection: {
     paddingHorizontal: 24,
     paddingVertical: 40,
-    backgroundColor: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
     marginHorizontal: 24,
     marginBottom: 40,
     borderRadius: 24,
