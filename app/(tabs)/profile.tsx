@@ -3,13 +3,29 @@ import {
   StyleSheet,
   Text,
   View,
-  SafeAreaView,
   TouchableOpacity,
   TextInput,
   Alert,
+  ScrollView,
+  Image,
 } from 'react-native';
 import { useAuth } from '@/contexts/AuthContext';
-import { User, LogOut, Phone } from 'lucide-react-native';
+import { 
+  User, 
+  LogOut, 
+  Phone, 
+  Settings, 
+  Star, 
+  Clock, 
+  MapPin, 
+  Edit3,
+  Shield,
+  HelpCircle,
+  Info,
+  ChevronRight,
+  CheckCircle,
+  AlertCircle
+} from 'lucide-react-native';
 import Loading from '@/components/Loading';
 
 export default function ProfileScreen() {
@@ -75,22 +91,24 @@ export default function ProfileScreen() {
 
   if (!isAuthenticated) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <View style={styles.authContainer}>
           <View style={styles.authHeader}>
-            <User size={48} color="#3B82F6" />
-            <Text style={styles.authTitle}>Conectează-te</Text>
+            <View style={styles.authIconContainer}>
+              <User size={48} color="#2563EB" />
+            </View>
+            <Text style={styles.authTitle}>Bine ai venit pe Meșterul!</Text>
             <Text style={styles.authSubtitle}>
               {step === 'phone'
-                ? 'Introdu numărul de telefon pentru a primi codul OTP'
-                : 'Introdu codul OTP primit pe WhatsApp'}
+                ? 'Conectează-te pentru a accesa toate funcționalitățile platformei'
+                : 'Introdu codul OTP primit pe WhatsApp pentru a continua'}
             </Text>
           </View>
 
           {step === 'phone' ? (
             <View style={styles.inputContainer}>
               <View style={styles.phoneInputContainer}>
-                <Phone size={20} color="#64748B" />
+                <Phone size={20} color="#6B7280" />
                 <TextInput
                   style={styles.phoneInput}
                   placeholder="+40 7XX XXX XXX"
@@ -101,12 +119,12 @@ export default function ProfileScreen() {
                 />
               </View>
               <TouchableOpacity
-                style={[styles.button, isSubmitting && styles.buttonDisabled]}
+                style={[styles.primaryButton, isSubmitting && styles.buttonDisabled]}
                 onPress={handleSendOTP}
                 disabled={isSubmitting}
               >
-                <Text style={styles.buttonText}>
-                  {isSubmitting ? 'Se trimite...' : 'Trimite OTP'}
+                <Text style={styles.primaryButtonText}>
+                  {isSubmitting ? 'Se trimite...' : 'Trimite Cod OTP'}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -122,87 +140,201 @@ export default function ProfileScreen() {
                 textAlign="center"
               />
               <TouchableOpacity
-                style={[styles.button, isSubmitting && styles.buttonDisabled]}
+                style={[styles.primaryButton, isSubmitting && styles.buttonDisabled]}
                 onPress={handleLogin}
                 disabled={isSubmitting}
               >
-                <Text style={styles.buttonText}>
+                <Text style={styles.primaryButtonText}>
                   {isSubmitting ? 'Se verifică...' : 'Conectează-te'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={styles.backButton}
+                style={styles.secondaryButton}
                 onPress={() => setStep('phone')}
               >
-                <Text style={styles.backButtonText}>Înapoi</Text>
+                <Text style={styles.secondaryButtonText}>Înapoi</Text>
               </TouchableOpacity>
             </View>
           )}
 
-          <Text style={styles.demoNote}>
-            Demo: Folosește codul OTP "123456"
-          </Text>
+          <View style={styles.demoNoteContainer}>
+            <AlertCircle size={16} color="#F59E0B" />
+            <Text style={styles.demoNote}>
+              Demo: Folosește codul OTP "123456"
+            </Text>
+          </View>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.profileContainer}>
+    <View style={styles.container}>
+      <ScrollView style={styles.profileContainer} showsVerticalScrollIndicator={false}>
+        {/* Profile Header */}
         <View style={styles.profileHeader}>
           <View style={styles.avatarContainer}>
             <User size={48} color="white" />
           </View>
-          <Text style={styles.userName}>{user?.name}</Text>
+          <Text style={styles.userName}>{user?.name || 'Utilizator Meșterul'}</Text>
           <Text style={styles.userPhone}>{user?.phone}</Text>
+          <View style={styles.verificationBadge}>
+            <CheckCircle size={16} color="#10B981" />
+            <Text style={styles.verificationText}>Cont Verificat</Text>
+          </View>
         </View>
 
+        {/* Stats Section */}
+        <View style={styles.statsContainer}>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>12</Text>
+            <Text style={styles.statLabel}>Job-uri Postate</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>8</Text>
+            <Text style={styles.statLabel}>Job-uri Completate</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>4.9</Text>
+            <Text style={styles.statLabel}>Rating</Text>
+          </View>
+        </View>
+
+        {/* Menu Items */}
         <View style={styles.menuContainer}>
           <TouchableOpacity style={styles.menuItem}>
-            <Text style={styles.menuItemText}>Istoric comenzi</Text>
+            <View style={styles.menuItemLeft}>
+              <View style={[styles.menuIcon, { backgroundColor: '#DBEAFE' }]}>
+                <Clock size={20} color="#2563EB" />
+              </View>
+              <Text style={styles.menuItemText}>Istoric Job-uri</Text>
+            </View>
+            <ChevronRight size={20} color="#9CA3AF" />
           </TouchableOpacity>
+
           <TouchableOpacity style={styles.menuItem}>
-            <Text style={styles.menuItemText}>Recenziile mele</Text>
+            <View style={styles.menuItemLeft}>
+              <View style={[styles.menuIcon, { backgroundColor: '#FEF3C7' }]}>
+                <Star size={20} color="#F59E0B" />
+              </View>
+              <Text style={styles.menuItemText}>Recenziile Mele</Text>
+            </View>
+            <ChevronRight size={20} color="#9CA3AF" />
           </TouchableOpacity>
+
           <TouchableOpacity style={styles.menuItem}>
-            <Text style={styles.menuItemText}>Setări</Text>
+            <View style={styles.menuItemLeft}>
+              <View style={[styles.menuIcon, { backgroundColor: '#D1FAE5' }]}>
+                <MapPin size={20} color="#10B981" />
+              </View>
+              <Text style={styles.menuItemText}>Locațiile Mele</Text>
+            </View>
+            <ChevronRight size={20} color="#9CA3AF" />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.menuItem}>
+            <View style={styles.menuItemLeft}>
+              <View style={[styles.menuIcon, { backgroundColor: '#F3E8FF' }]}>
+                <Edit3 size={20} color="#8B5CF6" />
+              </View>
+              <Text style={styles.menuItemText}>Editează Profilul</Text>
+            </View>
+            <ChevronRight size={20} color="#9CA3AF" />
           </TouchableOpacity>
         </View>
 
+        {/* Settings Section */}
+        <View style={styles.menuContainer}>
+          <TouchableOpacity style={styles.menuItem}>
+            <View style={styles.menuItemLeft}>
+              <View style={[styles.menuIcon, { backgroundColor: '#FEF2F2' }]}>
+                <Settings size={20} color="#EF4444" />
+              </View>
+              <Text style={styles.menuItemText}>Setări</Text>
+            </View>
+            <ChevronRight size={20} color="#9CA3AF" />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.menuItem}>
+            <View style={styles.menuItemLeft}>
+              <View style={[styles.menuIcon, { backgroundColor: '#FEF3C7' }]}>
+                <Shield size={20} color="#F59E0B" />
+              </View>
+              <Text style={styles.menuItemText}>Confidențialitate</Text>
+            </View>
+            <ChevronRight size={20} color="#9CA3AF" />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.menuItem}>
+            <View style={styles.menuItemLeft}>
+              <View style={[styles.menuIcon, { backgroundColor: '#DBEAFE' }]}>
+                <HelpCircle size={20} color="#2563EB" />
+              </View>
+              <Text style={styles.menuItemText}>Ajutor & Suport</Text>
+            </View>
+            <ChevronRight size={20} color="#9CA3AF" />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.menuItem}>
+            <View style={styles.menuItemLeft}>
+              <View style={[styles.menuIcon, { backgroundColor: '#E0E7FF' }]}>
+                <Info size={20} color="#6366F1" />
+              </View>
+              <Text style={styles.menuItemText}>Despre Meșterul</Text>
+            </View>
+            <ChevronRight size={20} color="#9CA3AF" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Logout Button */}
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <LogOut size={20} color="#EF4444" />
           <Text style={styles.logoutButtonText}>Deconectează-te</Text>
         </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+
+        {/* App Version */}
+        <View style={styles.versionContainer}>
+          <Text style={styles.versionText}>Meșterul v1.0.0</Text>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F9FAFB',
   },
   authContainer: {
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 24,
+    paddingTop: 60,
   },
   authHeader: {
     alignItems: 'center',
     marginBottom: 32,
   },
+  authIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#DBEAFE',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
   authTitle: {
     fontSize: 24,
-    fontWeight: '600',
-    color: '#1E293B',
-    marginTop: 16,
+    fontWeight: '700',
+    color: '#1F2937',
     marginBottom: 8,
+    textAlign: 'center',
   },
   authSubtitle: {
     fontSize: 16,
-    color: '#64748B',
+    color: '#6B7280',
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -212,54 +344,61 @@ const styles = StyleSheet.create({
   phoneInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#E5E7EB',
   },
   phoneInput: {
     flex: 1,
     fontSize: 16,
     marginLeft: 12,
-    color: '#1E293B',
+    color: '#1F2937',
   },
   otpInput: {
-    backgroundColor: 'white',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#E5E7EB',
     fontSize: 18,
     fontWeight: '600',
     letterSpacing: 4,
   },
-  button: {
-    backgroundColor: '#3B82F6',
+  primaryButton: {
+    backgroundColor: '#2563EB',
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
   },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: 'white',
+  primaryButtonText: {
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   },
-  backButton: {
+  secondaryButton: {
     alignItems: 'center',
     paddingVertical: 12,
   },
-  backButtonText: {
-    color: '#64748B',
+  secondaryButtonText: {
+    color: '#6B7280',
     fontSize: 16,
+    fontWeight: '500',
+  },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+  demoNoteContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 24,
+    gap: 8,
   },
   demoNote: {
-    marginTop: 24,
     fontSize: 14,
     color: '#F59E0B',
     textAlign: 'center',
@@ -267,17 +406,18 @@ const styles = StyleSheet.create({
   },
   profileContainer: {
     flex: 1,
-    padding: 24,
+    paddingTop: 60,
   },
   profileHeader: {
     alignItems: 'center',
-    marginBottom: 32,
+    paddingHorizontal: 24,
+    paddingBottom: 24,
   },
   avatarContainer: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#2563EB',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
@@ -285,42 +425,115 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#1E293B',
+    color: '#1F2937',
     marginBottom: 4,
   },
   userPhone: {
     fontSize: 16,
-    color: '#64748B',
+    color: '#6B7280',
+    marginBottom: 12,
   },
-  menuContainer: {
-    backgroundColor: 'white',
-    borderRadius: 12,
+  verificationBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#D1FAE5',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 6,
+  },
+  verificationText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#10B981',
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 24,
     marginBottom: 24,
   },
+  statItem: {
+    flex: 1,
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 16,
+    marginHorizontal: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  statNumber: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#6B7280',
+    textAlign: 'center',
+  },
+  menuContainer: {
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: 24,
+    marginBottom: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    overflow: 'hidden',
+  },
   menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingVertical: 16,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+    borderBottomColor: '#F3F4F6',
+  },
+  menuItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  menuIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   menuItemText: {
     fontSize: 16,
+    fontWeight: '500',
     color: '#374151',
   },
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'white',
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: 24,
+    marginBottom: 24,
     borderRadius: 12,
     paddingVertical: 16,
     borderWidth: 1,
     borderColor: '#FEE2E2',
+    gap: 8,
   },
   logoutButtonText: {
     color: '#EF4444',
     fontSize: 16,
     fontWeight: '500',
-    marginLeft: 8,
+  },
+  versionContainer: {
+    alignItems: 'center',
+    paddingBottom: 32,
+  },
+  versionText: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    fontWeight: '500',
   },
 });
