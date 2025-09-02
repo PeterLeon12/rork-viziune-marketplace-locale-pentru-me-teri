@@ -24,9 +24,23 @@ import {
   MoreVertical
 } from 'lucide-react-native';
 
+interface Job {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  location: string;
+  budget: string;
+  urgency: string;
+  status: string;
+  applications: number;
+  postedDate: string;
+  responses: { id: string; name: string; rating: number; price: string; responseTime: string }[];
+}
+
 export default function JobsScreen() {
   const [activeTab, setActiveTab] = useState('posted');
-  const [jobs, setJobs] = useState([
+  const [jobs, setJobs] = useState<Job[]>([
     {
       id: '1',
       title: 'Vreau să îmi repar ușa de la garaj',
@@ -76,7 +90,7 @@ export default function JobsScreen() {
     }
   ]);
 
-  const renderJobCard = ({ item }) => (
+  const renderJobCard = ({ item }: { item: Job }) => (
     <View style={styles.jobCard}>
       <View style={styles.jobHeader}>
         <View style={styles.jobTitleContainer}>
@@ -124,9 +138,9 @@ export default function JobsScreen() {
         <Text style={styles.applicationsText}>
           {item.applications} {item.applications === 1 ? 'aplicație' : 'aplicații'}
         </Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.viewApplicationsButton}
-          onPress={() => router.push(`/job-applications/${item.id}`)}
+          onPress={() => router.push('/search')}
         >
           <Text style={styles.viewApplicationsText}>Vezi Aplicațiile</Text>
           <Eye size={16} color="#2563EB" />
@@ -156,13 +170,13 @@ export default function JobsScreen() {
       )}
 
       <View style={styles.jobActions}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.editButton}
-          onPress={() => router.push(`/edit-job/${item.id}`)}
+          onPress={() => router.push('/post-job')}
         >
           <Text style={styles.editButtonText}>Editează</Text>
         </TouchableOpacity>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.completeButton}
           onPress={() => handleCompleteJob(item.id)}
         >
@@ -173,7 +187,7 @@ export default function JobsScreen() {
     </View>
   );
 
-  const handleCompleteJob = (jobId) => {
+  const handleCompleteJob = (jobId: string) => {
     Alert.alert(
       'Marchează Job-ul ca Completat',
       'Ești sigur că vrei să marchezi acest job ca fiind completat?',

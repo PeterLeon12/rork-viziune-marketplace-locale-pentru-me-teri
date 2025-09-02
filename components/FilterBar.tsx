@@ -64,14 +64,20 @@ export default function FilterBar({
         </TouchableOpacity>
 
         <TouchableOpacity 
-          style={[styles.filterButton, filters.minRating && styles.activeFilter]}
+          style={[
+            styles.filterButton,
+            filters.minRating ? styles.activeFilter : undefined
+          ]}
           onPress={() => onFiltersChange({ 
             ...filters, 
             minRating: filters.minRating ? undefined : 4.5 
           })}
         >
           <Star size={16} color={filters.minRating ? '#F59E0B' : '#6B7280'} />
-          <Text style={[styles.filterText, filters.minRating && styles.activeFilterText]}>
+          <Text style={[
+            styles.filterText,
+            filters.minRating ? styles.activeFilterText : undefined
+          ]}>
             4.5+ ⭐
           </Text>
         </TouchableOpacity>
