@@ -60,6 +60,7 @@ interface OptimalAuthContextType extends AuthState {
   refreshUser: () => Promise<void>;
   sendEmailVerification: () => Promise<void>;
   verifyEmail: (token: string) => Promise<void>;
+  switchRole: (newRole: 'client' | 'pro') => Promise<void>;
   
   // State management
   setAuthMode: (mode: AuthState['authMode']) => void;
@@ -454,6 +455,37 @@ export const [OptimalAuthProvider, useOptimalAuth] = createContextHook<OptimalAu
     setAuthState(prev => ({ ...prev, authMode: mode }));
   }, []);
 
+  const switchRole = useCallback(async (newRole: 'client' | 'pro'): Promise<void> => {
+    try {
+      if (!authState.user) throw new Error('Nu există utilizator autentificat');
+      if (authState.user.role === newRole) throw new Error('Utilizatorul are deja acest rol');
+
+      setAuthState(prev => ({ ...prev, isLoading: true }));
+
+      const updatedUser = {
+        ...authState.user,
+        role: newRole,
+      };
+
+      await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updatedUser));
+      
+      setAuthState(prev => ({
+        ...prev,
+        user: updatedUser,
+        isLoading: false
+      }));
+
+      Alert.alert(
+        'Rol schimbat!', 
+        `Acum ai rol de ${newRole === 'pro' ? 'profesionist' : 'client'}. Aplicația se va actualiza.`,
+        [{ text: 'OK' }]
+      );
+    } catch (error: any) {
+      setAuthState(prev => ({ ...prev, isLoading: false }));
+      throw new Error(error.message || 'Nu am putut schimba rolul');
+    }
+  }, [authState.user]);
+
   const resetAuth = useCallback(() => {
     setAuthState({
       user: null,
@@ -479,6 +511,7 @@ export const [OptimalAuthProvider, useOptimalAuth] = createContextHook<OptimalAu
     refreshUser,
     sendEmailVerification,
     verifyEmail,
+    switchRole,
     setAuthMode,
     resetAuth,
   }), [
@@ -496,6 +529,7 @@ export const [OptimalAuthProvider, useOptimalAuth] = createContextHook<OptimalAu
     refreshUser,
     sendEmailVerification,
     verifyEmail,
+    switchRole,
     setAuthMode,
     resetAuth,
   ]);

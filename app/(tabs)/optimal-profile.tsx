@@ -534,6 +534,7 @@ export default function OptimalProfileScreen() {
     updateProfile,
     updatePreferences,
     sendEmailVerification,
+    switchRole,
     setAuthMode
   } = useOptimalAuth();
 
@@ -585,6 +586,31 @@ export default function OptimalProfileScreen() {
 
   const handleLocationSelect = (location: any) => {
     updateProfile({ location: location.name });
+  };
+
+  const handleSwitchRole = async () => {
+    const currentRole = user?.role;
+    const newRole = currentRole === 'client' ? 'pro' : 'client';
+    const roleLabel = newRole === 'pro' ? 'profesionist' : 'client';
+    
+    Alert.alert(
+      'Schimbă rolul',
+      `Vrei să devii ${roleLabel}? Aceasta va schimba interfața aplicației.`,
+      [
+        { text: 'Anulează', style: 'cancel' },
+        {
+          text: `Devine ${roleLabel}`,
+          style: 'default',
+          onPress: async () => {
+            try {
+              await switchRole(newRole);
+            } catch (error: any) {
+              Alert.alert('Eroare', error.message);
+            }
+          },
+        },
+      ]
+    );
   };
 
   if (isLoading) {
@@ -743,13 +769,41 @@ export default function OptimalProfileScreen() {
           </View>
           
           <ScrollView style={styles.modalContent}>
-            <View style={styles.settingItem}>
-              <Text style={styles.settingTitle}>Notificări</Text>
-              <Switch value={user?.preferences.notifications} />
+            {/* Role Switching */}
+            <View style={styles.settingSection}>
+              <Text style={styles.settingSectionTitle}>Rol & Cont</Text>
+              
+              <TouchableOpacity style={styles.settingButton} onPress={handleSwitchRole}>
+                <View style={styles.settingButtonContent}>
+                  <RefreshCw size={20} color="#3B82F6" />
+                  <View style={styles.settingButtonText}>
+                    <Text style={styles.settingButtonTitle}>
+                      Schimbă în {user?.role === 'client' ? 'Profesionist' : 'Client'}
+                    </Text>
+                    <Text style={styles.settingButtonSubtitle}>
+                      {user?.role === 'client' 
+                        ? 'Oferă servicii și câștigă bani' 
+                        : 'Caută și angajează profesioniști'
+                      }
+                    </Text>
+                  </View>
+                </View>
+                <ChevronRight size={16} color="#9CA3AF" />
+              </TouchableOpacity>
             </View>
-            <View style={styles.settingItem}>
-              <Text style={styles.settingTitle}>Actualizări prin email</Text>
-              <Switch value={user?.preferences.emailUpdates} />
+
+            {/* Preferences */}
+            <View style={styles.settingSection}>
+              <Text style={styles.settingSectionTitle}>Preferințe</Text>
+              
+              <View style={styles.settingItem}>
+                <Text style={styles.settingTitle}>Notificări</Text>
+                <Switch value={user?.preferences.notifications} />
+              </View>
+              <View style={styles.settingItem}>
+                <Text style={styles.settingTitle}>Actualizări prin email</Text>
+                <Switch value={user?.preferences.emailUpdates} />
+              </View>
             </View>
           </ScrollView>
         </SafeAreaView>
@@ -1241,6 +1295,49 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 24,
   },
+  
+  // Settings Modal
+  settingSection: {
+    marginBottom: 32,
+  },
+  settingSectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1F2937',
+    marginBottom: 16,
+  },
+  settingButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  settingButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  settingButtonText: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  settingButtonTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1F2937',
+    marginBottom: 4,
+  },
+  settingButtonSubtitle: {
+    fontSize: 14,
+    color: '#6B7280',
+  },
   settingItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1249,9 +1346,15 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     marginBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   settingTitle: {
     fontSize: 16,
     color: '#1F2937',
+    fontWeight: '500',
   },
 });
