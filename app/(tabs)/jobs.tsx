@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,8 @@ import {
   StyleSheet,
   FlatList,
   Alert,
+  RefreshControl,
+  TextInput,
 } from 'react-native';
 import { router } from 'expo-router';
 import { 
@@ -23,8 +25,8 @@ import {
   XCircle,
   MoreVertical
 } from 'lucide-react-native';
-import { useOptimalAuth } from '@/contexts/OptimalAuthContext';
-import { trpc } from '@/lib/trpc';
+import { useOptimalAuth } from '../../contexts/OptimalAuthContext';
+import { trpc } from '../../lib/trpc';
 
 interface Job {
   id: string;

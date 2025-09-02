@@ -458,25 +458,20 @@ export const [OptimalAuthProvider, useOptimalAuth] = createContextHook<OptimalAu
         if (!prev.user) throw new Error('Nu există utilizator autentificat');
         if (prev.user.role === newRole) throw new Error('Utilizatorul are deja acest rol');
         
-        return { ...prev, isLoading: true };
+        const updatedUser = {
+          ...prev.user,
+          role: newRole,
+        };
+
+        // Update AsyncStorage
+        AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updatedUser));
+        
+        return { 
+          ...prev, 
+          user: updatedUser,
+          isLoading: false 
+        };
       });
-
-      const currentUser = authState.user;
-      if (!currentUser) throw new Error('Nu există utilizator autentificat');
-      if (currentUser.role === newRole) throw new Error('Utilizatorul are deja acest rol');
-
-      const updatedUser = {
-        ...currentUser,
-        role: newRole,
-      };
-
-      await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updatedUser));
-      
-      setAuthState(prev => ({
-        ...prev,
-        user: updatedUser,
-        isLoading: false
-      }));
 
       Alert.alert(
         'Rol schimbat!', 

@@ -1,22 +1,20 @@
-import React from 'react';
 import { Tabs } from 'expo-router';
-import { useOptimalAuth } from '@/contexts/OptimalAuthContext';
-import { Redirect } from 'expo-router';
-import { Home, Search, Plus, MessageCircle, User, Briefcase, Calendar, TrendingUp, Award } from 'lucide-react-native';
-import Loading from '@/components/Loading';
+import { useOptimalAuth } from '../../contexts/OptimalAuthContext';
+import { Home, Search, Plus, MessageCircle, User } from 'lucide-react-native';
+import Loading from '../../components/Loading';
 
 export default function TabLayout() {
-  const { user, isAuthenticated, isLoading } = useOptimalAuth();
+  const { user, isLoading } = useOptimalAuth();
 
   if (isLoading) {
     return <Loading message="Se încarcă..." />;
   }
 
-  if (!isAuthenticated || !user) {
-    return <Redirect href="/optimal-profile" />;
+  if (!user) {
+    return null; // Will redirect to login
   }
 
-  // Show different tabs based on user role
+  // Professional tabs
   if (user.role === 'pro') {
     return (
       <Tabs
@@ -30,13 +28,6 @@ export default function TabLayout() {
             paddingBottom: 8,
             paddingTop: 8,
             height: 60,
-          },
-          headerStyle: {
-            backgroundColor: '#FFFFFF',
-          },
-          headerTitleStyle: {
-            fontWeight: '600',
-            color: '#1F2937',
           },
         }}>
         
@@ -75,10 +66,6 @@ export default function TabLayout() {
             headerTitle: 'Profilul Profesional',
           }}
         />
-
-        {/* Hide other screens from professional tabs */}
-        <Tabs.Screen name="search" options={{ href: null }} />
-        <Tabs.Screen name="post-job" options={{ href: null }} />
       </Tabs>
     );
   }
@@ -96,13 +83,6 @@ export default function TabLayout() {
           paddingBottom: 8,
           paddingTop: 8,
           height: 60,
-        },
-        headerStyle: {
-          backgroundColor: '#FFFFFF',
-        },
-        headerTitleStyle: {
-          fontWeight: '600',
-          color: '#1F2937',
         },
       }}>
       
@@ -137,7 +117,7 @@ export default function TabLayout() {
         name="jobs"
         options={{
           title: 'Job-urile Mele',
-          tabBarIcon: ({ color, size }) => <Briefcase size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
           headerTitle: 'Cererile Mele',
         }}
       />
@@ -150,17 +130,6 @@ export default function TabLayout() {
           headerTitle: 'Conversații',
         }}
       />
-      
-      <Tabs.Screen
-        name="optimal-profile"
-        options={{
-          title: 'Profil',
-          tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
-          headerTitle: 'Profilul Meu',
-        }}
-      />
-
-      {/* No hidden screens needed for client tabs */}
     </Tabs>
   );
 }
