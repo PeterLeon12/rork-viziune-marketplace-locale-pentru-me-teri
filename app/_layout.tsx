@@ -7,6 +7,7 @@ import { trpc, trpcClient } from "@/lib/trpc";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { EnhancedAuthProvider } from "@/contexts/EnhancedAuthContext";
+import { OptimalAuthProvider } from "@/contexts/OptimalAuthContext";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -32,9 +33,11 @@ function RootLayoutInner() {
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <EnhancedAuthProvider>
-              <GestureHandlerRootView>
-                <RootLayoutNav />
-              </GestureHandlerRootView>
+              <OptimalAuthProvider>
+                <GestureHandlerRootView>
+                  <RootLayoutNav />
+                </GestureHandlerRootView>
+              </OptimalAuthProvider>
             </EnhancedAuthProvider>
           </AuthProvider>
         </QueryClientProvider>

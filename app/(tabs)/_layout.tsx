@@ -79,6 +79,14 @@ export default function TabLayout() {
           headerTitle: 'Profilul Meu',
         }}
       />
+      <Tabs.Screen
+        name="optimal-profile"
+        options={{
+          href: null, // Hide from tab bar
+          title: 'Profil Optimal',
+          headerTitle: 'Profilul Meu',
+        }}
+      />
     </Tabs>
   );
 }
