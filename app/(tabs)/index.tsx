@@ -365,10 +365,7 @@ const styles = StyleSheet.create({
     color: '#374151',
     fontWeight: '600',
   },
-  section: {
-    paddingHorizontal: 24,
-    paddingVertical: 32,
-  },
+
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
