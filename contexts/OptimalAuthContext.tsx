@@ -83,10 +83,7 @@ export const [OptimalAuthProvider, useOptimalAuth] = createContextHook<OptimalAu
     needsOnboarding: false,
   });
 
-  // tRPC mutations
-  const loginMutation = trpc.auth.login.useMutation();
-  const registerMutation = trpc.auth.register.useMutation();
-  const forgotPasswordMutation = trpc.auth.forgotPassword.useMutation();
+  // tRPC mutations (only for profile updates)
   const updateProfileMutation = trpc.profiles.updateProfile.useMutation();
 
   useEffect(() => {

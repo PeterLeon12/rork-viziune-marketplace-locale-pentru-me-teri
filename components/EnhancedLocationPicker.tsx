@@ -202,8 +202,8 @@ export default function EnhancedLocationPicker({
             {majorCities?.cities.slice(0, 6).map(city => 
               renderLocationItem({
                 id: city.id,
-                name: city.displayName,
-                fullName: `${city.displayName}, ${city.county}`,
+                name: city.name,
+                fullName: `${city.name}, ${city.county}`,
                 city: city.city,
                 county: city.county,
                 type: city.type,
@@ -222,8 +222,8 @@ export default function EnhancedLocationPicker({
         data={popularLocations?.majorCities}
         renderItem={({ item }) => renderLocationItem({
           id: item.id,
-          name: item.displayName,
-          fullName: `${item.displayName}, ${item.county}`,
+          name: item.name,
+          fullName: `${item.name}, ${item.county}`,
           city: item.city,
           county: item.county,
           type: item.type,
