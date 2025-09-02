@@ -3,7 +3,6 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, TextInput } from 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { trpc } from '@/lib/trpc';
 import { ProCard } from '@/components/ProCard';
-import { FilterBar } from '@/components/FilterBar';
 import { Search, MapPin, Filter, Star } from 'lucide-react-native';
 
 export default function SearchScreen() {

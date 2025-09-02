@@ -1,22 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { trpc } from '@/lib/trpc';
-import { CategoryCard } from '@/components/CategoryCard';
-import { RegionSelector } from '@/components/RegionSelector';
-import { MapPin, Star, Clock, Shield, TrendingUp } from 'lucide-react-native';
+import CategoryCard from '@/components/CategoryCard';
+import RegionSelector from '@/components/RegionSelector';
+import { MapPin, Star, Clock, Shield } from 'lucide-react-native';
 
 export default function HomeScreen() {
-  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const [selectedRegion, setSelectedRegion] = useState<any>(null);
   
   const { data: categories } = trpc.profiles.getCategories.useQuery();
   const { data: areas } = trpc.profiles.getAreas.useQuery();
 
   const featuredCategories = [
-    { id: '1', name: 'Instalații', icon: '🔧', color: '#3B82F6', description: 'Plumbing & Heating' },
-    { id: '2', name: 'Electric', icon: '⚡', color: '#F59E0B', description: 'Electrical Work' },
-    { id: '3', name: 'Electrocasnice', icon: '📺', color: '#10B981', description: 'Appliances' },
-    { id: '4', name: 'Montaj AC', icon: '❄️', color: '#06B6D4', description: 'AC Installation' },
+    { id: '1', name: 'Instalații', icon: 'wrench', color: '#3B82F6', description: 'Plumbing & Heating' },
+    { id: '2', name: 'Electric', icon: 'zap', color: '#F59E0B', description: 'Electrical Work' },
+    { id: '3', name: 'Electrocasnice', icon: 'tv', color: '#10B981', description: 'Appliances' },
+    { id: '4', name: 'Montaj AC', icon: 'wind', color: '#06B6D4', description: 'AC Installation' },
   ];
 
   const quickActions = [
@@ -36,15 +36,13 @@ export default function HomeScreen() {
           </Text>
           
           {/* Region Selector */}
-          <TouchableOpacity 
-            style={styles.regionSelector}
-            onPress={() => setSelectedRegion('select')}
-          >
-            <MapPin size={20} color="#6B7280" />
-            <Text style={styles.regionText}>
-              {selectedRegion || 'Select your region'}
-            </Text>
-          </TouchableOpacity>
+          <RegionSelector
+            selectedRegion={selectedRegion}
+            onRegionSelect={(region) => {
+              setSelectedRegion(region);
+            }}
+            regions={areas || []}
+          />
         </View>
 
         {/* Quick Actions */}
@@ -96,17 +94,6 @@ export default function HomeScreen() {
             </View>
           </View>
         </View>
-
-        {/* Region Selector Modal */}
-        <RegionSelector
-          visible={selectedRegion === 'select'}
-          onClose={() => setSelectedRegion(null)}
-          onSelect={(region) => {
-            setSelectedRegion(region);
-            setSelectedRegion(null);
-          }}
-          regions={areas || []}
-        />
       </ScrollView>
     </SafeAreaView>
   );
