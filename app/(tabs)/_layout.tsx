@@ -71,6 +71,14 @@ export default function TabLayout() {
           headerTitle: 'Profilul Meu',
         }}
       />
+      <Tabs.Screen
+        name="enhanced-profile"
+        options={{
+          href: null, // Hide from tab bar
+          title: 'Profil Enhanced',
+          headerTitle: 'Profilul Meu',
+        }}
+      />
     </Tabs>
   );
 }
