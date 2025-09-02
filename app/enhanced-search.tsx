@@ -133,9 +133,7 @@ export default function EnhancedSearchScreen() {
     { enabled: filters.query.length > 2 }
   );
 
-  useEffect(() => {
-    refetch();
-  }, [filters]);
+  // useEffect removed - tRPC query automatically refetches when filters change
 
   const updateFilter = (key: keyof SearchFilters, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value }));

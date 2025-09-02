@@ -103,11 +103,14 @@ export const [EnhancedAuthProvider, useEnhancedAuth] = createContextHook<Enhance
     let interval: NodeJS.Timeout;
     if (authState.otpCountdown > 0) {
       interval = setInterval(() => {
-        setAuthState(prev => ({
-          ...prev,
-          otpCountdown: prev.otpCountdown - 1,
-          canResendOtp: prev.otpCountdown <= 1
-        }));
+        setAuthState(prev => {
+          const newCount = prev.otpCountdown - 1;
+          return {
+            ...prev,
+            otpCountdown: newCount,
+            canResendOtp: newCount <= 0
+          };
+        });
       }, 1000);
     }
     return () => {
