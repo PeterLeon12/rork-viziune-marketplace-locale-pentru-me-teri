@@ -71,14 +71,8 @@ function ClientHomeScreen() {
   const { data: categories } = trpc.profiles.getCategories.useQuery();
   const { data: areas } = trpc.profiles.getAreas.useQuery();
 
-  const featuredCategories = [
-    { id: '1', name: 'Instalații', icon: 'wrench', color: '#3B82F6', description: 'Plumbing & Heating' },
-    { id: '2', name: 'Electric', icon: 'zap', color: '#F59E0B', description: 'Electrical Work' },
-    { id: '3', name: 'Electrocasnice', icon: 'tv', color: '#10B981', description: 'Appliances' },
-    { id: '4', name: 'Montaj AC', icon: 'wind', color: '#06B6D4', description: 'AC Installation' },
-    { id: '5', name: 'Zugraveli', icon: 'paintbrush', color: '#8B5CF6', description: 'Painting' },
-    { id: '6', name: 'Dulgherie', icon: 'hammer', color: '#F97316', description: 'Carpentry' },
-  ];
+  // Get popular categories from backend
+  const { data: popularCategories = [] } = trpc.profiles.getPopularCategories.useQuery();
 
   const quickActions = [
     { 
@@ -182,7 +176,7 @@ function ClientHomeScreen() {
             </TouchableOpacity>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesScroll}>
-            {featuredCategories.map((category) => (
+            {popularCategories.map((category) => (
               <CategoryCard
                 key={category.id}
                 category={category}

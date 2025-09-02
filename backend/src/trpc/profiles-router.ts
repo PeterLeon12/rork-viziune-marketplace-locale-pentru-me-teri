@@ -3,6 +3,13 @@ import { createTRPCRouter, publicProcedure, protectedProcedure } from './create-
 import { db } from '../db/adapter';
 import { proProfiles, services, reviews, categories, areas } from '../db/schema';
 import { eq, inArray, gte, lte, desc, asc, and, or, like } from 'drizzle-orm';
+import { 
+  comprehensiveCategories, 
+  getPopularCategories, 
+  getEmergencyCategories, 
+  getBusinessCategories, 
+  searchCategories 
+} from '../db/comprehensive-categories';
 
 const searchProfilesSchema = z.object({
   query: z.string().optional(),
@@ -195,10 +202,52 @@ export const profilesRouter = createTRPCRouter({
   getCategories: publicProcedure
     .query(async () => {
       try {
-        return await db.getCategories();
+        // Return comprehensive categories instead of database categories
+        return comprehensiveCategories;
       } catch (error) {
         console.error('Error in getCategories:', error);
         throw new Error('Failed to get categories');
+      }
+    }),
+
+  getPopularCategories: publicProcedure
+    .query(async () => {
+      try {
+        return getPopularCategories();
+      } catch (error) {
+        console.error('Error in getPopularCategories:', error);
+        throw new Error('Failed to get popular categories');
+      }
+    }),
+
+  getEmergencyCategories: publicProcedure
+    .query(async () => {
+      try {
+        return getEmergencyCategories();
+      } catch (error) {
+        console.error('Error in getEmergencyCategories:', error);
+        throw new Error('Failed to get emergency categories');
+      }
+    }),
+
+  getBusinessCategories: publicProcedure
+    .query(async () => {
+      try {
+        return getBusinessCategories();
+      } catch (error) {
+        console.error('Error in getBusinessCategories:', error);
+        throw new Error('Failed to get business categories');
+      }
+    }),
+
+  searchCategories: publicProcedure
+    .input(z.object({ query: z.string().min(1) }))
+    .query(async ({ input }) => {
+      try {
+        return searchCategories(input.query);
+      } catch (error) {
+        console.error('Error in searchCategories:', error);
+        throw new Error('Failed to search categories');
       }
     }),
 

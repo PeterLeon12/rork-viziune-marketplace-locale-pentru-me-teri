@@ -1,34 +1,31 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
-import { Category } from '@/types';
-import { 
-  Wrench, 
-  Zap, 
-  Tv, 
-  Wind, 
-  Paintbrush, 
-  Hammer, 
-  Sparkles 
-} from 'lucide-react-native';
 
-interface CategoryCardProps {
-  category: Category;
-  onPress: (category: Category) => void;
-  selected?: boolean;
+interface ComprehensiveCategory {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
+  subcategories?: string[];
+  popular: boolean;
+  emergency: boolean;
+  business: boolean;
 }
 
-const iconMap = {
-  wrench: Wrench,
-  zap: Zap,
-  tv: Tv,
-  wind: Wind,
-  paintbrush: Paintbrush,
-  hammer: Hammer,
-  sparkles: Sparkles,
-};
+interface CategoryCardProps {
+  category: ComprehensiveCategory;
+  onPress: (category: ComprehensiveCategory) => void;
+  selected?: boolean;
+  showDescription?: boolean;
+}
 
-export default function CategoryCard({ category, onPress, selected = false }: CategoryCardProps) {
-  const IconComponent = iconMap[category.icon as keyof typeof iconMap] || Wrench;
+export default function CategoryCard({ 
+  category, 
+  onPress, 
+  selected = false, 
+  showDescription = false 
+}: CategoryCardProps) {
 
   return (
     <TouchableOpacity
@@ -41,14 +38,16 @@ export default function CategoryCard({ category, onPress, selected = false }: Ca
       testID={`category-${category.id}`}
     >
       <View style={[styles.iconContainer, { backgroundColor: selected ? 'rgba(255,255,255,0.2)' : category.color }]}>
-        <IconComponent 
-          size={24} 
-          color={selected ? 'white' : 'white'} 
-        />
+        <Text style={styles.emojiIcon}>{category.icon}</Text>
       </View>
       <Text style={[styles.name, { color: selected ? 'white' : '#1E293B' }]}>
         {category.name}
       </Text>
+      {showDescription && (
+        <Text style={[styles.description, { color: selected ? 'rgba(255,255,255,0.8)' : '#64748B' }]}>
+          {category.description}
+        </Text>
+      )}
     </TouchableOpacity>
   );
 }
@@ -83,5 +82,15 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     textAlign: 'center',
+  },
+  emojiIcon: {
+    fontSize: 24,
+    textAlign: 'center',
+  },
+  description: {
+    fontSize: 10,
+    textAlign: 'center',
+    marginTop: 4,
+    lineHeight: 12,
   },
 });
