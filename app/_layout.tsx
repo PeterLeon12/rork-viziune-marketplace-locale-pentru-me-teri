@@ -5,8 +5,6 @@ import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { trpc, trpcClient } from "@/lib/trpc";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { EnhancedAuthProvider } from "@/contexts/EnhancedAuthContext";
 import { OptimalAuthProvider } from "@/contexts/OptimalAuthContext";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -31,15 +29,11 @@ function RootLayoutInner() {
     <ErrorBoundary>
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
         <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <EnhancedAuthProvider>
-              <OptimalAuthProvider>
-                <GestureHandlerRootView>
-                  <RootLayoutNav />
-                </GestureHandlerRootView>
-              </OptimalAuthProvider>
-            </EnhancedAuthProvider>
-          </AuthProvider>
+          <OptimalAuthProvider>
+            <GestureHandlerRootView>
+              <RootLayoutNav />
+            </GestureHandlerRootView>
+          </OptimalAuthProvider>
         </QueryClientProvider>
       </trpc.Provider>
     </ErrorBoundary>

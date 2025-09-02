@@ -76,7 +76,7 @@ export default function TabLayout() {
           }}
         />
 
-        {/* Hide other screens */}
+        {/* Hide other screens from professional tabs */}
         <Tabs.Screen name="client" options={{ href: null }} />
         <Tabs.Screen name="professional" options={{ href: null }} />
         <Tabs.Screen name="enhanced-profile" options={{ href: null }} />
@@ -165,7 +165,7 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Hide other screens */}
+      {/* Hide other screens from client tabs */}
       <Tabs.Screen name="client" options={{ href: null }} />
       <Tabs.Screen name="professional" options={{ href: null }} />
       <Tabs.Screen name="enhanced-profile" options={{ href: null }} />
