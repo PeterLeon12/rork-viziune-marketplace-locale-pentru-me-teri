@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Home, Search, MessageCircle, User, Briefcase } from 'lucide-react-native';
+import { Home, Search, MessageCircle, User, Briefcase, Plus } from 'lucide-react-native';
 
 export default function TabLayout() {
   return (
@@ -26,41 +26,49 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: 'Acasă',
           tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
-          headerTitle: 'Rork Marketplace',
+          headerTitle: 'Rork - Marketplace de Servicii',
         }}
       />
       <Tabs.Screen
         name="search"
         options={{
-          title: 'Find Help',
+          title: 'Caută',
           tabBarIcon: ({ color, size }) => <Search size={size} color={color} />,
-          headerTitle: 'Find Professional Help',
+          headerTitle: 'Găsește Profesioniști',
+        }}
+      />
+      <Tabs.Screen
+        name="post-job"
+        options={{
+          title: 'Postează',
+          tabBarIcon: ({ color, size }) => <Plus size={size} color={color} />,
+          headerTitle: 'Postează un Job',
         }}
       />
       <Tabs.Screen
         name="jobs"
         options={{
-          title: 'Jobs',
+          title: 'Job-uri',
           tabBarIcon: ({ color, size }) => <Briefcase size={size} color={color} />,
-          headerTitle: 'Available Jobs',
+          headerTitle: 'Job-urile Mele',
         }}
       />
       <Tabs.Screen
         name="messages"
         options={{
-          title: 'Messages',
+          title: 'Mesaje',
           tabBarIcon: ({ color, size }) => <MessageCircle size={size} color={color} />,
-          headerTitle: 'Conversations',
+          headerTitle: 'Conversații',
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
+          title: 'Profil',
           tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
-          headerTitle: 'My Profile',
+          headerTitle: 'Profilul Meu',
         }}
       />
     </Tabs>
