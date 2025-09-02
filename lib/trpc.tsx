@@ -6,9 +6,8 @@ import type { AppRouter } from '../backend/src/trpc/app-router';
 
 export const trpc = createTRPCReact<AppRouter>();
 
-// For development, connect to local backend
-// For production, this should point to your deployed backend URL
-const BACKEND_URL = process.env.EXPO_PUBLIC_RORK_API_BASE_URL || 'http://localhost:3000';
+// Connect to live Romanian marketplace backend
+const BACKEND_URL = 'https://rork-viziune-marketplace-locale-pentru-me-teri-production.up.railway.app';
 
 export const trpcClient = trpc.createClient({
   links: [
