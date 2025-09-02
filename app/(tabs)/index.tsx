@@ -154,7 +154,7 @@ export default function HomeScreen() {
 
         {/* Trust Features - TaskRabbit Style */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>De Ce Să Alegi Rork?</Text>
+          <Text style={styles.sectionTitle}>De Ce Să Alegi Meșterul?</Text>
           <View style={styles.trustFeatures}>
             <View style={styles.trustFeature}>
               <View style={styles.trustIconContainer}>

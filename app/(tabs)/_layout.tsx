@@ -28,7 +28,7 @@ export default function TabLayout() {
         options={{
           title: 'Acasă',
           tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
-          headerTitle: 'Rork - Marketplace de Servicii',
+          headerTitle: 'Meșterul - Marketplace de Servicii',
         }}
       />
       <Tabs.Screen

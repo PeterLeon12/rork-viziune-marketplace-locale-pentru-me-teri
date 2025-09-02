@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Viziune Marketplace Locale pentru Meșteri",
-    "slug": "viziune-marketplace-locale",
+    "name": "Meșterul - Marketplace de Servicii",
+    "slug": "mesterul-marketplace",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "mesterul",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
@@ -15,14 +15,14 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "app.rork.viziune-marketplace-locale"
+      "bundleIdentifier": "app.mesterul.marketplace"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "app.rork.viziune-marketplace-locale"
+      "package": "app.mesterul.marketplace"
     },
     "web": {
       "favicon": "./assets/images/favicon.png"
@@ -31,7 +31,7 @@
       [
         "expo-router",
         {
-          "origin": "https://rork.com/"
+          "origin": "https://mesterul.ro/"
         }
       ]
     ],
