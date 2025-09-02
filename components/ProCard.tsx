@@ -1,89 +1,118 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, View, Image } from 'react-native';
-import { ProProfile } from '@/types';
-import { Star, Shield, Clock, Phone, MessageCircle } from 'lucide-react-native';
-import { categories } from '@/constants/data';
-import { Linking } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { Star, MapPin, Clock, Shield, MessageCircle, Phone } from 'lucide-react-native';
+
+interface ProProfile {
+  id: string;
+  displayName: string;
+  company: string;
+  categories: string[];
+  zones: string[];
+  minPrice: number;
+  about: string;
+  verified: boolean;
+  responseTimeAvgMins: number;
+  ratingAvg: number;
+  ratingCount: number;
+  photoUrl: string | null;
+}
 
 interface ProCardProps {
   profile: ProProfile;
-  onPress: (profile: ProProfile) => void;
+  onPress?: () => void;
 }
 
-export default function ProCard({ profile, onPress }: ProCardProps) {
-  const handleWhatsApp = () => {
-    Linking.openURL(profile.contact.whatsappLink);
+export function ProCard({ profile, onPress }: ProCardProps) {
+  const formatResponseTime = (minutes: number) => {
+    if (minutes < 60) return `${minutes}m`;
+    const hours = Math.floor(minutes / 60);
+    return `${hours}h`;
   };
 
-  const handlePhone = () => {
-    Linking.openURL(`tel:${profile.contact.phone}`);
-  };
-
-  const getCategoryNames = () => {
-    return profile.categories
-      .map(catId => categories.find(cat => cat.id === catId)?.name)
-      .filter(Boolean)
-      .join(', ');
+  const formatPrice = (price: number) => {
+    return `from ${price} RON`;
   };
 
   return (
-    <TouchableOpacity
-      style={styles.container}
-      onPress={() => onPress(profile)}
-      testID={`pro-card-${profile.id}`}
-    >
+    <TouchableOpacity style={styles.card} onPress={onPress}>
+      {/* Header */}
       <View style={styles.header}>
-        <Image
-          source={{ uri: profile.photoUrl || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face' }}
-          style={styles.avatar}
-        />
-        <View style={styles.info}>
-          <View style={styles.titleRow}>
-            <Text style={styles.name} numberOfLines={1}>
-              {profile.displayName}
-            </Text>
+        <View style={styles.profileInfo}>
+          <View style={styles.avatar}>
+            {profile.photoUrl ? (
+              <Image source={{ uri: profile.photoUrl }} style={styles.avatarImage} />
+            ) : (
+              <Text style={styles.avatarText}>
+                {profile.displayName.charAt(0).toUpperCase()}
+              </Text>
+            )}
             {profile.verified && (
               <View style={styles.verifiedBadge}>
-                <Shield size={12} color="#10B981" />
+                <Shield size={12} color="#FFFFFF" />
               </View>
             )}
           </View>
-          <Text style={styles.categories} numberOfLines={1}>
-            {getCategoryNames()}
-          </Text>
-          <View style={styles.statsRow}>
-            <View style={styles.rating}>
-              <Star size={14} color="#F59E0B" fill="#F59E0B" />
-              <Text style={styles.ratingText}>
-                {profile.ratingAvg.toFixed(1)} ({profile.ratingCount})
-              </Text>
-            </View>
-            <View style={styles.responseTime}>
-              <Clock size={12} color="#6B7280" />
-              <Text style={styles.responseTimeText}>
-                ~{profile.responseTimeAvgMins} min
-              </Text>
-            </View>
+          <View style={styles.nameSection}>
+            <Text style={styles.displayName}>{profile.displayName}</Text>
+            <Text style={styles.company}>{profile.company}</Text>
           </View>
+        </View>
+        
+        {/* Rating */}
+        <View style={styles.ratingSection}>
+          <View style={styles.ratingRow}>
+            <Star size={16} color="#F59E0B" fill="#F59E0B" />
+            <Text style={styles.ratingText}>{profile.ratingAvg}</Text>
+          </View>
+          <Text style={styles.ratingCount}>({profile.ratingCount})</Text>
         </View>
       </View>
 
+      {/* Categories */}
+      <View style={styles.categoriesContainer}>
+        {profile.categories.slice(0, 3).map((category, index) => (
+          <View key={index} style={styles.categoryChip}>
+            <Text style={styles.categoryText}>{category}</Text>
+          </View>
+        ))}
+        {profile.categories.length > 3 && (
+          <Text style={styles.moreCategories}>+{profile.categories.length - 3} more</Text>
+        )}
+      </View>
+
+      {/* About */}
+      <Text style={styles.about} numberOfLines={2}>
+        {profile.about}
+      </Text>
+
+      {/* Location and Response Time */}
+      <View style={styles.detailsRow}>
+        <View style={styles.detailItem}>
+          <MapPin size={16} color="#6B7280" />
+          <Text style={styles.detailText}>
+            {profile.zones.slice(0, 2).join(', ')}
+            {profile.zones.length > 2 && ' + more'}
+          </Text>
+        </View>
+        <View style={styles.detailItem}>
+          <Clock size={16} color="#6B7280" />
+          <Text style={styles.detailText}>
+            Responds in {formatResponseTime(profile.responseTimeAvgMins)}
+          </Text>
+        </View>
+      </View>
+
+      {/* Price and Actions */}
       <View style={styles.footer}>
-        <Text style={styles.price}>
-          de la {profile.minPrice} lei
-        </Text>
-        <View style={styles.actions}>
-          <TouchableOpacity
-            style={[styles.actionButton, styles.whatsappButton]}
-            onPress={handleWhatsApp}
-          >
-            <MessageCircle size={16} color="#25D366" />
+        <Text style={styles.price}>{formatPrice(profile.minPrice)}</Text>
+        <View style={styles.actionButtons}>
+          <TouchableOpacity style={styles.messageButton}>
+            <MessageCircle size={16} color="#2563EB" />
+            <Text style={styles.messageButtonText}>Message</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.actionButton, styles.phoneButton]}
-            onPress={handlePhone}
-          >
-            <Phone size={16} color="#3B82F6" />
+          <TouchableOpacity style={styles.callButton}>
+            <Phone size={16} color="#FFFFFF" />
+            <Text style={styles.callButtonText}>Call</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -92,74 +121,135 @@ export default function ProCard({ profile, onPress }: ProCardProps) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: 8,
     elevation: 3,
-    borderWidth: 1,
-    borderColor: '#F1F5F9',
   },
   header: {
     flexDirection: 'row',
-    marginBottom: 12,
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 16,
+  },
+  profileInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
   },
   avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginRight: 12,
-  },
-  info: {
-    flex: 1,
-  },
-  titleRow: {
-    flexDirection: 'row',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#E5E7EB',
     alignItems: 'center',
-    marginBottom: 4,
+    justifyContent: 'center',
+    marginRight: 12,
+    position: 'relative',
   },
-  name: {
-    fontSize: 16,
+  avatarImage: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+  },
+  avatarText: {
+    fontSize: 20,
     fontWeight: '600',
-    color: '#1E293B',
-    flex: 1,
+    color: '#6B7280',
   },
   verifiedBadge: {
-    marginLeft: 8,
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    backgroundColor: '#10B981',
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  categories: {
+  nameSection: {
+    flex: 1,
+  },
+  displayName: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1F2937',
+    marginBottom: 2,
+  },
+  company: {
     fontSize: 14,
-    color: '#64748B',
-    marginBottom: 8,
+    color: '#6B7280',
   },
-  statsRow: {
+  ratingSection: {
+    alignItems: 'flex-end',
+  },
+  ratingRow: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  rating: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 16,
+    marginBottom: 2,
   },
   ratingText: {
-    fontSize: 14,
-    color: '#374151',
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1F2937',
     marginLeft: 4,
-    fontWeight: '500',
   },
-  responseTime: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  responseTimeText: {
+  ratingCount: {
     fontSize: 12,
     color: '#6B7280',
-    marginLeft: 4,
+  },
+  categoriesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 12,
+    gap: 8,
+  },
+  categoryChip: {
+    backgroundColor: '#F3F4F6',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  categoryText: {
+    fontSize: 12,
+    color: '#374151',
+    fontWeight: '500',
+  },
+  moreCategories: {
+    fontSize: 12,
+    color: '#6B7280',
+    fontStyle: 'italic',
+    alignSelf: 'center',
+  },
+  about: {
+    fontSize: 14,
+    color: '#4B5563',
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  detailsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  detailItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  detailText: {
+    fontSize: 13,
+    color: '#6B7280',
+    marginLeft: 6,
   },
   footer: {
     flexDirection: 'row',
@@ -171,25 +261,38 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#059669',
   },
-  actions: {
+  actionButtons: {
     flexDirection: 'row',
+    gap: 8,
   },
-  actionButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+  messageButton: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 8,
-  },
-  whatsappButton: {
-    backgroundColor: '#F0FDF4',
-    borderWidth: 1,
-    borderColor: '#25D366',
-  },
-  phoneButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
     backgroundColor: '#EFF6FF',
     borderWidth: 1,
-    borderColor: '#3B82F6',
+    borderColor: '#DBEAFE',
+  },
+  messageButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#2563EB',
+    marginLeft: 4,
+  },
+  callButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: '#2563EB',
+  },
+  callButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#FFFFFF',
+    marginLeft: 4,
   },
 });

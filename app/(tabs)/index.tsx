@@ -1,186 +1,112 @@
 import React, { useEffect, useState } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
-  TouchableOpacity,
-  SafeAreaView,
-} from 'react-native';
-import { router } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useAppStore } from '@/store/useAppStore';
-import CategoryCard from '@/components/CategoryCard';
-import SearchBar from '@/components/SearchBar';
-import { Category } from '@/types';
+import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { trpc } from '@/lib/trpc';
-import { Plus, Briefcase } from 'lucide-react-native';
+import { CategoryCard } from '@/components/CategoryCard';
+import { RegionSelector } from '@/components/RegionSelector';
+import { MapPin, Star, Clock, Shield, TrendingUp } from 'lucide-react-native';
 
 export default function HomeScreen() {
-  const {
-    searchQuery,
-    selectedCategory,
-    selectedArea,
-    categories,
-    areas,
-    setSearchQuery,
-    setSelectedCategory,
-    setSelectedArea,
-    setCategories,
-    setAreas,
-    performSearch,
-  } = useAppStore();
+  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  
+  const { data: categories } = trpc.profiles.getCategories.useQuery();
+  const { data: areas } = trpc.profiles.getAreas.useQuery();
 
-  const [selectedRegion, setSelectedRegion] = useState<any>(null);
+  const featuredCategories = [
+    { id: '1', name: 'Instalații', icon: '🔧', color: '#3B82F6', description: 'Plumbing & Heating' },
+    { id: '2', name: 'Electric', icon: '⚡', color: '#F59E0B', description: 'Electrical Work' },
+    { id: '3', name: 'Electrocasnice', icon: '📺', color: '#10B981', description: 'Appliances' },
+    { id: '4', name: 'Montaj AC', icon: '❄️', color: '#06B6D4', description: 'AC Installation' },
+  ];
 
-  // Fetch categories and areas from backend
-  const { data: categoriesData = [], isLoading: categoriesLoading } = trpc.profiles.getCategories.useQuery();
-  const { data: areasData = [], isLoading: areasLoading } = trpc.profiles.getAreas.useQuery();
-
-  // Update store when data is fetched
-  React.useEffect(() => {
-    if (categoriesData.length > 0) {
-      setCategories(categoriesData);
-    }
-  }, [categoriesData, setCategories]);
-
-  React.useEffect(() => {
-    if (areasData.length > 0) {
-      setAreas(areasData);
-    }
-  }, [areasData, setAreas]);
-
-  const handleCategoryPress = (category: Category) => {
-    setSelectedCategory(category.id);
-  };
-
-  const handleRegionSelect = (region: any) => {
-    setSelectedRegion(region);
-    setSelectedArea(region.name);
-  };
-
-  const handleSearch = () => {
-    performSearch();
-    router.push('/search');
-  };
+  const quickActions = [
+    { title: 'Post a Job', subtitle: 'Get help from professionals', icon: '📝', action: 'post-job' },
+    { title: 'Find Help Now', subtitle: 'Available professionals', icon: '🔍', action: 'search' },
+    { title: 'My Jobs', subtitle: 'Track your requests', icon: '📋', action: 'my-jobs' },
+  ];
 
   return (
     <SafeAreaView style={styles.container}>
-      <LinearGradient
-        colors={['#3B82F6', '#1E40AF']}
-        style={styles.header}
-      >
-        <View style={styles.headerContent}>
-          <Text style={styles.title}>
-            Găsește meșteri de încredere în toată România
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Hero Section */}
+        <View style={styles.heroSection}>
+          <Text style={styles.heroTitle}>Get Help from Trusted Professionals</Text>
+          <Text style={styles.heroSubtitle}>
+            Connect with skilled artisans across Romania for any home service you need
           </Text>
-          <Text style={styles.subtitle}>
-            Compară profiluri, citește recenzii și contactează direct
-          </Text>
-        </View>
-      </LinearGradient>
-
-      <SearchBar
-        query={searchQuery}
-        onQueryChange={setSearchQuery}
-        selectedRegion={selectedRegion}
-        onRegionSelect={handleRegionSelect}
-        regions={areas}
-        onSearch={handleSearch}
-      />
-
-      {/* Quick Actions */}
-      <View style={styles.quickActions}>
-        <TouchableOpacity 
-          style={styles.actionButton}
-          onPress={() => router.push('/post-job')}
-        >
-          <Plus size={20} color="white" />
-          <Text style={styles.actionButtonText}>Postează Job</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[styles.actionButton, styles.secondaryActionButton]}
-          onPress={() => router.push('/jobs')}
-        >
-          <Briefcase size={20} color="#3B82F6" />
-          <Text style={[styles.actionButtonText, styles.secondaryActionButtonText]}>
-            Vezi Job-uri
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Categorii populare</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.categoriesContainer}
+          
+          {/* Region Selector */}
+          <TouchableOpacity 
+            style={styles.regionSelector}
+            onPress={() => setSelectedRegion('select')}
           >
-            {categories.map((category) => (
+            <MapPin size={20} color="#6B7280" />
+            <Text style={styles.regionText}>
+              {selectedRegion || 'Select your region'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Quick Actions */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          <View style={styles.quickActionsGrid}>
+            {quickActions.map((action, index) => (
+              <TouchableOpacity key={index} style={styles.quickActionCard}>
+                <Text style={styles.quickActionIcon}>{action.icon}</Text>
+                <Text style={styles.quickActionTitle}>{action.title}</Text>
+                <Text style={styles.quickActionSubtitle}>{action.subtitle}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Featured Categories */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Popular Services</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesScroll}>
+            {featuredCategories.map((category) => (
               <CategoryCard
                 key={category.id}
                 category={category}
-                onPress={handleCategoryPress}
-                selected={selectedCategory === category.id}
+                onPress={() => {}}
               />
             ))}
           </ScrollView>
         </View>
 
+        {/* Trust Features */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Cum funcționează</Text>
-          <View style={styles.stepsContainer}>
-            <View style={styles.step}>
-              <View style={[styles.stepNumber, { backgroundColor: '#3B82F6' }]}>
-                <Text style={styles.stepNumberText}>1</Text>
-              </View>
-              <View style={styles.stepContent}>
-                <Text style={styles.stepTitle}>Caută</Text>
-                <Text style={styles.stepDescription}>
-                  Alege categoria și zona ta
-                </Text>
-              </View>
+          <Text style={styles.sectionTitle}>Why Choose Rork?</Text>
+          <View style={styles.trustFeatures}>
+            <View style={styles.trustFeature}>
+              <Shield size={24} color="#10B981" />
+              <Text style={styles.trustFeatureTitle}>Verified Professionals</Text>
+              <Text style={styles.trustFeatureText}>All artisans are background-checked</Text>
             </View>
-            
-            <View style={styles.step}>
-              <View style={[styles.stepNumber, { backgroundColor: '#10B981' }]}>
-                <Text style={styles.stepNumberText}>2</Text>
-              </View>
-              <View style={styles.stepContent}>
-                <Text style={styles.stepTitle}>Compară</Text>
-                <Text style={styles.stepDescription}>
-                  Vezi profiluri, prețuri și recenzii
-                </Text>
-              </View>
+            <View style={styles.trustFeature}>
+              <Star size={24} color="#F59E0B" />
+              <Text style={styles.trustFeatureTitle}>Rated & Reviewed</Text>
+              <Text style={styles.trustFeatureText}>See real feedback from customers</Text>
             </View>
-            
-            <View style={styles.step}>
-              <View style={[styles.stepNumber, { backgroundColor: '#F59E0B' }]}>
-                <Text style={styles.stepNumberText}>3</Text>
-              </View>
-              <View style={styles.stepContent}>
-                <Text style={styles.stepTitle}>Contactează</Text>
-                <Text style={styles.stepDescription}>
-                  Sună sau scrie direct pe WhatsApp
-                </Text>
-              </View>
+            <View style={styles.trustFeature}>
+              <Clock size={24} color="#3B82F6" />
+              <Text style={styles.trustFeatureTitle}>Quick Response</Text>
+              <Text style={styles.trustFeatureText}>Get quotes within hours</Text>
             </View>
           </View>
         </View>
 
-        <View style={styles.ctaSection}>
-          <TouchableOpacity 
-            style={styles.proButton}
-            onPress={() => router.push('/pro-onboarding')}
-          >
-            <Text style={styles.proButtonText}>Devino meșter</Text>
-            <Text style={styles.proButtonSubtext}>
-              Primește clienți noi în fiecare zi
-            </Text>
-          </TouchableOpacity>
-        </View>
+        {/* Region Selector Modal */}
+        <RegionSelector
+          visible={selectedRegion === 'select'}
+          onClose={() => setSelectedRegion(null)}
+          onSelect={(region) => {
+            setSelectedRegion(region);
+            setSelectedRegion(null);
+          }}
+          regions={areas || []}
+        />
       </ScrollView>
     </SafeAreaView>
   );
@@ -189,125 +115,119 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F9FAFB',
   },
-  header: {
-    paddingTop: 20,
-    paddingBottom: 24,
-    paddingHorizontal: 16,
-  },
-  headerContent: {
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.9)',
-    textAlign: 'center',
-  },
-  quickActions: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    gap: 12,
-  },
-  actionButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#3B82F6',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    gap: 8,
-  },
-  secondaryActionButton: {
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#3B82F6',
-  },
-  actionButtonText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  secondaryActionButtonText: {
-    color: '#3B82F6',
-  },
-  content: {
-    flex: 1,
-  },
-  section: {
-    paddingHorizontal: 16,
-    paddingVertical: 20,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#1E293B',
-    marginBottom: 16,
-  },
-  categoriesContainer: {
-    paddingRight: 16,
-  },
-  stepsContainer: {
-    gap: 16,
-  },
-  step: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  stepNumber: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 16,
-  },
-  stepNumberText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  stepContent: {
-    flex: 1,
-  },
-  stepTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1E293B',
-    marginBottom: 4,
-  },
-  stepDescription: {
-    fontSize: 14,
-    color: '#64748B',
-  },
-  ctaSection: {
-    paddingHorizontal: 16,
+  heroSection: {
+    backgroundColor: '#2563EB',
+    padding: 24,
     paddingBottom: 32,
   },
-  proButton: {
-    backgroundColor: '#059669',
-    borderRadius: 12,
-    padding: 20,
+  heroTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  heroSubtitle: {
+    fontSize: 16,
+    color: '#E0E7FF',
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 24,
+  },
+  regionSelector: {
+    flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignSelf: 'center',
+    minWidth: 200,
   },
-  proButtonText: {
-    fontSize: 18,
+  regionText: {
+    marginLeft: 8,
+    fontSize: 16,
+    color: '#374151',
+    fontWeight: '500',
+  },
+  section: {
+    padding: 24,
+    paddingTop: 32,
+  },
+  sectionTitle: {
+    fontSize: 22,
     fontWeight: '600',
-    color: 'white',
-    marginBottom: 4,
+    color: '#1F2937',
+    marginBottom: 20,
   },
-  proButtonSubtext: {
+  quickActionsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  quickActionCard: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    padding: 20,
+    borderRadius: 16,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  quickActionIcon: {
+    fontSize: 32,
+    marginBottom: 12,
+  },
+  quickActionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1F2937',
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  quickActionSubtitle: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: '#6B7280',
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  categoriesScroll: {
+    marginLeft: -24,
+    paddingLeft: 24,
+  },
+  trustFeatures: {
+    gap: 20,
+  },
+  trustFeature: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: '#FFFFFF',
+    padding: 20,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  trustFeatureTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1F2937',
+    marginLeft: 12,
+    marginBottom: 4,
+    flex: 1,
+  },
+  trustFeatureText: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginLeft: 12,
+    lineHeight: 20,
+    flex: 1,
   },
 });
