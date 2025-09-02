@@ -17,6 +17,7 @@ const app = new Hono();
 app.use('*', rateLimiter({
   windowMs: 15 * 60 * 1000, // 15 minutes
   limit: 100, // limit each IP to 100 requests per windowMs
+  keyGenerator: (c) => c.req.header('x-forwarded-for') || c.req.header('x-real-ip') || 'default',
 }));
 
 // Enable CORS with production security
@@ -45,7 +46,10 @@ app.get('/', (c) => {
 app.use('/trpc/*', trpcServer({
   endpoint: '/trpc',
   router: appRouter,
-  createContext: (opts) => createContext(opts),
+  createContext: async (opts) => {
+    const context = await createContext(opts);
+    return context as any;
+  },
 }));
 
 // Error handling middleware

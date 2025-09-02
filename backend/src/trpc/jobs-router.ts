@@ -25,7 +25,7 @@ export const jobsRouter = createTRPCRouter({
         conditions.push(eq(jobs.area, area));
       }
 
-      const results = await db
+      const jobResults = await db
         .select({
           id: jobs.id,
           title: jobs.title,
@@ -50,16 +50,14 @@ export const jobsRouter = createTRPCRouter({
         .orderBy(desc(jobs.createdAt))
         .limit(limit)
         .offset(offset);
-
-      const results = await query;
       
       return {
-        jobs: results,
+        jobs: jobResults,
         pagination: {
-          total: results.length,
+          total: jobResults.length,
           limit,
           offset,
-          hasMore: results.length === limit,
+          hasMore: jobResults.length === limit,
         },
       };
     }),

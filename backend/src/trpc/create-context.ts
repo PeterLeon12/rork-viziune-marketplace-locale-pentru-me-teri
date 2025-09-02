@@ -1,11 +1,10 @@
 import { initTRPC, TRPCError } from '@trpc/server';
 import { verifyToken, JWTPayload } from '../utils/auth';
-import { Request } from 'hono';
 
 // Create context interface
 export interface Context {
   user?: JWTPayload;
-  req?: Request;
+  req?: any;
 }
 
 // Create tRPC instance
