@@ -6,7 +6,9 @@
     "start": "npx expo start --tunnel",
     "start-web": "npx expo start --web --tunnel",
     "start-web-dev": "DEBUG=expo* npx expo start --web --tunnel",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",

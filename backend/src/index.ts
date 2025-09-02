@@ -32,11 +32,20 @@ app.use('*', cors({
   allowHeaders: ['Content-Type', 'Authorization'],
 }));
 
-// Health check endpoint
+// Health check endpoints
 app.get('/', (c) => {
   return c.json({ 
     status: 'ok', 
-    message: 'Rork Marketplace API is running',
+    message: 'Meșterul Marketplace API is running',
+    timestamp: new Date().toISOString(),
+    version: '1.0.0'
+  });
+});
+
+app.get('/health', (c) => {
+  return c.json({ 
+    status: 'healthy', 
+    message: 'Meșterul Marketplace API is healthy',
     timestamp: new Date().toISOString(),
     version: '1.0.0'
   });
