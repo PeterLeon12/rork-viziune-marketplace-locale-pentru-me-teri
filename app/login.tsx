@@ -1,29 +1,42 @@
 import React, { useState } from 'react';
-import { useOptimalAuth } from '../contexts/OptimalAuthContext';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { 
+  View, 
+  Text, 
+  TextInput, 
+  TouchableOpacity, 
+  StyleSheet, 
+  Alert, 
+  KeyboardAvoidingView, 
+  Platform,
+  Image,
+  Dimensions
+} from 'react-native';
+import { useSimpleAuth } from '../contexts/SimpleAuthContext';
 import { router } from 'expo-router';
+import { Eye, EyeOff, Mail, Lock, ArrowRight, Sparkles } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react-native';
+
+const { width, height } = Dimensions.get('window');
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useOptimalAuth();
+  const { login } = useSimpleAuth();
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert('Eroare', 'Te rog completează toate câmpurile');
+    if (!email.trim() || !password.trim()) {
+      Alert.alert('Eroare', 'Te rugăm să completezi toate câmpurile');
       return;
     }
 
     setIsLoading(true);
     try {
       await login(email, password);
-      // Will automatically navigate to tabs due to auth state change
+      // Navigation will be handled by the auth context
     } catch (error: any) {
-      Alert.alert('Eroare de conectare', error.message);
+      Alert.alert('Eroare', error.message || 'Nu am putut să te conectez');
     } finally {
       setIsLoading(false);
     }
@@ -31,73 +44,125 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView 
-      style={styles.container} 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
     >
-      <LinearGradient
-        colors={['#3B82F6', '#1D4ED8']}
-        style={styles.gradient}
+      <LinearGradient 
+        colors={['#667eea', '#764ba2']} 
+        style={styles.background}
       >
-        <View style={styles.content}>
-          <View style={styles.header}>
-            <Text style={styles.title}>Bun venit înapoi!</Text>
-            <Text style={styles.subtitle}>Conectează-te la contul tău Meșterul</Text>
-          </View>
-
-          <View style={styles.form}>
-            <View style={styles.inputContainer}>
-              <Mail size={20} color="#6B7280" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Email"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-                placeholderTextColor="#9CA3AF"
-              />
+        {/* Header Section */}
+        <View style={styles.header}>
+          <View style={styles.logoContainer}>
+            <View style={styles.logoIcon}>
+              <Sparkles size={40} color="#FFFFFF" />
             </View>
-            
-            <View style={styles.inputContainer}>
-              <Lock size={20} color="#6B7280" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Parolă"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry={!showPassword}
-                placeholderTextColor="#9CA3AF"
-              />
-              <TouchableOpacity 
-                onPress={() => setShowPassword(!showPassword)}
-                style={styles.eyeIcon}
-              >
-                {showPassword ? (
-                  <EyeOff size={20} color="#6B7280" />
-                ) : (
-                  <Eye size={20} color="#6B7280" />
-                )}
+            <Text style={styles.logoText}>Meșterul</Text>
+            <Text style={styles.logoSubtext}>Marketplace de Servicii</Text>
+          </View>
+        </View>
+
+        {/* Form Section */}
+        <View style={styles.formContainer}>
+          <View style={styles.formCard}>
+            <Text style={styles.welcomeTitle}>Bine ai revenit! 👋</Text>
+            <Text style={styles.welcomeSubtitle}>
+              Conectează-te pentru a continua cu serviciile tale
+            </Text>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Email</Text>
+              <View style={styles.inputContainer}>
+                <Mail size={20} color="#9CA3AF" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="ion@example.com"
+                  placeholderTextColor="#9CA3AF"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  autoFocus
+                />
+              </View>
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Parola</Text>
+              <View style={styles.inputContainer}>
+                <Lock size={20} color="#9CA3AF" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="Parola ta"
+                  placeholderTextColor="#9CA3AF"
+                  secureTextEntry={!showPassword}
+                  autoComplete="password"
+                />
+                <TouchableOpacity 
+                  style={styles.eyeButton}
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff size={20} color="#9CA3AF" />
+                  ) : (
+                    <Eye size={20} color="#9CA3AF" />
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <TouchableOpacity style={styles.forgotPassword}>
+              <Text style={styles.forgotPasswordText}>Ai uitat parola?</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.loginButton,
+                (!email || !password || isLoading) && styles.disabledButton
+              ]}
+              onPress={handleLogin}
+              disabled={!email || !password || isLoading}
+            >
+              {isLoading ? (
+                <Text style={styles.loginButtonText}>Se conectează...</Text>
+              ) : (
+                <>
+                  <Text style={styles.loginButtonText}>Conectează-te</Text>
+                  <ArrowRight size={20} color="#FFFFFF" />
+                </>
+              )}
+            </TouchableOpacity>
+
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>sau</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            <TouchableOpacity style={styles.googleButton}>
+              <View style={styles.googleIcon}>
+                <Text style={styles.googleIconText}>G</Text>
+              </View>
+              <Text style={styles.googleButtonText}>Continuă cu Google</Text>
+            </TouchableOpacity>
+
+            <View style={styles.signupPrompt}>
+              <Text style={styles.signupText}>Nu ai cont? </Text>
+              <TouchableOpacity onPress={() => router.push('/register')}>
+                <Text style={styles.signupLink}>Creează unul acum</Text>
               </TouchableOpacity>
             </View>
-
-            <TouchableOpacity 
-              style={[styles.loginButton, isLoading && styles.loginButtonDisabled]} 
-              onPress={handleLogin}
-              disabled={isLoading}
-            >
-              <Text style={styles.loginButtonText}>
-                {isLoading ? 'Se conectează...' : 'Conectare'}
-              </Text>
-              {!isLoading && <ArrowRight size={20} color="#FFFFFF" />}
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => router.push('/register')}>
-              <Text style={styles.registerLink}>
-                Nu ai cont? Înregistrează-te
-              </Text>
-            </TouchableOpacity>
           </View>
+        </View>
+
+        {/* Footer */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>
+            Continuând, accepți Termenii și Condițiile și Politica de Confidențialitate
+          </Text>
         </View>
       </LinearGradient>
     </KeyboardAvoidingView>
@@ -108,40 +173,84 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  gradient: {
+  background: {
     flex: 1,
-  },
-  content: {
-    flex: 1,
-    padding: 24,
-    justifyContent: 'center',
   },
   header: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 48,
+    paddingTop: height * 0.1,
   },
-  title: {
-    fontSize: 28,
+  logoContainer: {
+    alignItems: 'center',
+  },
+  logoIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  logoText: {
+    fontSize: 36,
     fontWeight: 'bold',
     color: '#FFFFFF',
     marginBottom: 8,
-    textAlign: 'center',
   },
-  subtitle: {
+  logoSubtext: {
     fontSize: 16,
-    color: '#E0E7FF',
+    color: 'rgba(255, 255, 255, 0.9)',
+  },
+  formContainer: {
+    flex: 1,
+    paddingHorizontal: 24,
+    justifyContent: 'center',
+  },
+  formCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 32,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  welcomeTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 8,
     textAlign: 'center',
   },
-  form: {
-    gap: 20,
+  welcomeSubtitle: {
+    fontSize: 16,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginBottom: 32,
+    lineHeight: 24,
+  },
+  inputGroup: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 8,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    backgroundColor: '#F9FAFB',
+    borderWidth: 2,
+    borderColor: '#E5E7EB',
+    borderRadius: 16,
     paddingHorizontal: 16,
-    paddingVertical: 4,
+    paddingVertical: 16,
   },
   inputIcon: {
     marginRight: 12,
@@ -149,34 +258,105 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    paddingVertical: 12,
     color: '#1F2937',
   },
-  eyeIcon: {
+  eyeButton: {
     padding: 4,
   },
-  loginButton: {
-    backgroundColor: '#FFFFFF',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 8,
-    marginTop: 8,
+  forgotPassword: {
+    alignSelf: 'flex-end',
+    marginBottom: 24,
   },
-  loginButtonDisabled: {
-    opacity: 0.7,
+  forgotPasswordText: {
+    fontSize: 14,
+    color: '#667eea',
+    fontWeight: '500',
+  },
+  loginButton: {
+    backgroundColor: '#667eea',
+    borderRadius: 16,
+    paddingVertical: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+    gap: 8,
   },
   loginButtonText: {
-    color: '#3B82F6',
-    fontSize: 16,
+    color: '#FFFFFF',
+    fontSize: 18,
     fontWeight: '600',
   },
-  registerLink: {
-    textAlign: 'center',
-    color: '#E0E7FF',
+  disabledButton: {
+    opacity: 0.6,
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E5E7EB',
+  },
+  dividerText: {
+    marginHorizontal: 16,
+    fontSize: 14,
+    color: '#9CA3AF',
+  },
+  googleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: '#E5E7EB',
+    borderRadius: 16,
+    paddingVertical: 16,
+    marginBottom: 24,
+    gap: 12,
+  },
+  googleIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#4285F4',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  googleIconText: {
+    color: '#FFFFFF',
     fontSize: 16,
-    marginTop: 16,
+    fontWeight: 'bold',
+  },
+  googleButtonText: {
+    fontSize: 16,
+    color: '#374151',
+    fontWeight: '500',
+  },
+  signupPrompt: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  signupText: {
+    fontSize: 14,
+    color: '#6B7280',
+  },
+  signupLink: {
+    fontSize: 14,
+    color: '#667eea',
+    fontWeight: '600',
+  },
+  footer: {
+    paddingHorizontal: 24,
+    paddingBottom: 32,
+  },
+  footerText: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.8)',
+    textAlign: 'center',
+    lineHeight: 18,
   },
 });

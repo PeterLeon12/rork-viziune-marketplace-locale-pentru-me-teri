@@ -1,18 +1,66 @@
 import { Tabs } from 'expo-router';
-import { useOptimalAuth } from '../../contexts/OptimalAuthContext';
-import { Home, Search, Plus, MessageCircle, User } from 'lucide-react-native';
-import Loading from '../../components/Loading';
+import { useSimpleAuth } from '../../contexts/SimpleAuthContext';
+import { View, Text } from 'react-native';
+import { useEffect } from 'react';
+import { router } from 'expo-router';
+import { 
+  Home, 
+  Search, 
+  Plus, 
+  MessageSquare, 
+  User,
+  Briefcase,
+  Calendar
+} from 'lucide-react-native';
 
 export default function TabLayout() {
-  const { user, isLoading } = useOptimalAuth();
+  const { user, isLoading } = useSimpleAuth();
 
+  console.log('📱 TabLayout - User state:', { user: !!user, userId: user?.id, userRole: user?.role, isLoading });
+
+  // Wait for authentication to initialize before making any decisions
   if (isLoading) {
-    return <Loading message="Se încarcă..." />;
+    console.log('⏳ TabLayout: Still loading, showing loading screen...');
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F9FAFB' }}>
+        <Text style={{ fontSize: 18, color: '#6B7280', textAlign: 'center' }}>
+          Se încarcă aplicația...
+        </Text>
+        <Text style={{ fontSize: 14, color: '#9CA3AF', marginTop: 8, textAlign: 'center' }}>
+          Vă rugăm să așteptați
+        </Text>
+      </View>
+    );
   }
+
+  // Only redirect after loading is complete and we're sure there's no user
+  useEffect(() => {
+    if (!isLoading && !user) {
+      console.log('❌ TabLayout: No user after loading, redirecting to login...');
+      // Use setTimeout to ensure navigation happens after render cycle
+      setTimeout(() => {
+        router.replace('/login');
+      }, 100);
+      return;
+    }
+  }, [user, isLoading]);
 
   if (!user) {
-    return null; // Will redirect to login
+    console.log('❌ TabLayout: No user, showing fallback');
+    // Return a fallback UI instead of null to prevent white screen
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F9FAFB' }}>
+        <Text style={{ fontSize: 18, color: '#6B7280', textAlign: 'center' }}>
+          Se încarcă aplicația...
+        </Text>
+        <Text style={{ fontSize: 14, color: '#9CA3AF', marginTop: 8, textAlign: 'center' }}>
+          Vă rugăm să așteptați
+        </Text>
+      </View>
+    );
   }
+
+  console.log('✅ TabLayout: User authenticated, rendering tabs');
 
   // Professional tabs
   if (user.role === 'pro') {
@@ -53,7 +101,7 @@ export default function TabLayout() {
           name="messages"
           options={{
             title: 'Mesaje',
-            tabBarIcon: ({ color, size }) => <MessageCircle size={size} color={color} />,
+            tabBarIcon: ({ color, size }) => <MessageSquare size={size} color={color} />,
             headerTitle: 'Clienți',
           }}
         />
@@ -126,7 +174,7 @@ export default function TabLayout() {
         name="messages"
         options={{
           title: 'Mesaje',
-          tabBarIcon: ({ color, size }) => <MessageCircle size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => <MessageSquare size={size} color={color} />,
           headerTitle: 'Conversații',
         }}
       />

@@ -1,51 +1,92 @@
-import { Stack, Redirect } from 'expo-router';
-import { OptimalAuthProvider, useOptimalAuth } from '../contexts/OptimalAuthContext';
-import { trpc, trpcClient } from '../lib/trpc';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import '../global.css';
+import { Stack } from 'expo-router';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SimpleAuthProvider, useSimpleAuth } from '../contexts/SimpleAuthContext';
+import { StatusBar } from 'expo-status-bar';
 
-// Create a stable query client instance
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-    },
-  },
-});
+// App Navigator component that handles authentication routing
+function AppNavigator() {
+  const { user, isLoading } = useSimpleAuth();
 
-function RootLayoutNav() {
-  const { user, isLoading } = useOptimalAuth();
+  console.log('🔍 AppNavigator - Auth State:', { user: !!user, isLoading, userId: user?.id, userRole: user?.role });
 
+  // Show loading screen while checking authentication
   if (isLoading) {
-    return null; // Will show loading in tabs
+    console.log('⏳ Showing loading screen...');
+    return (
+      <Stack>
+        <Stack.Screen 
+          name="loading" 
+          options={{ headerShown: false }}
+        />
+      </Stack>
+    );
   }
 
+  // If user is not authenticated, show authentication screens
   if (!user) {
-    return <Redirect href="/login" />;
+    console.log('🔐 No user found, showing login screen...');
+    return (
+      <Stack>
+        <Stack.Screen 
+          name="login" 
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen 
+          name="register" 
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen 
+          name="enhanced-pro-onboarding" 
+          options={{ headerShown: false }}
+        />
+      </Stack>
+    );
   }
 
+  // If user is authenticated, show main app
+  console.log('✅ User authenticated, showing main app...');
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="login" />
-      <Stack.Screen name="register" />
-      <Stack.Screen name="subscription" />
-      <Stack.Screen name="messaging" />
-      <Stack.Screen name="enhanced-search" />
-      <Stack.Screen name="pro" />
+    <Stack>
+      <Stack.Screen 
+        name="(tabs)" 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="enhanced-search" 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="messaging" 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="subscription" 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="pro/[id]" 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="+not-found" 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="_sitemap" 
+        options={{ headerShown: false }}
+      />
     </Stack>
   );
 }
 
+// Root layout component
 export default function RootLayout() {
   return (
-    <trpc.Provider client={trpcClient} queryClient={queryClient}>
-      <QueryClientProvider client={queryClient}>
-        <OptimalAuthProvider>
-          <RootLayoutNav />
-        </OptimalAuthProvider>
-      </QueryClientProvider>
-    </trpc.Provider>
+    <SafeAreaProvider>
+      <SimpleAuthProvider>
+        <StatusBar style="auto" />
+        <AppNavigator />
+      </SimpleAuthProvider>
+    </SafeAreaProvider>
   );
 }

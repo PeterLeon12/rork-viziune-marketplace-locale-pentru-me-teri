@@ -1,44 +1,171 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  StyleSheet,
-  SafeAreaView,
-  Alert,
-  Modal,
-} from 'react-native';
-import { router } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import { 
-  Check, 
-  Star, 
-  Crown, 
-  Building, 
+  View, 
+  Text, 
+  ScrollView, 
+  TouchableOpacity, 
+  StyleSheet, 
+  Alert,
+  Dimensions,
+  Switch
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSimpleAuth } from '../contexts/SimpleAuthContext';
+import { 
   ArrowLeft,
-  CreditCard,
+  Check,
+  X,
+  Crown,
+  Star,
+  Zap,
   Shield,
-  Zap
+  TrendingUp,
+  Users,
+  MessageSquare,
+  Camera,
+  Award,
+  Clock,
+  CreditCard,
+  Gift
 } from 'lucide-react-native';
-import { trpc } from '@/lib/trpc';
-import { useOptimalAuth } from '@/contexts/OptimalAuthContext';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+
+const { width, height } = Dimensions.get('window');
+
+// Subscription plans
+const subscriptionPlans = {
+  client: [
+    {
+      id: 'client_basic',
+      name: 'Basic',
+      price: 0,
+      period: 'Gratuit',
+      color: ['#6B7280', '#9CA3AF'],
+      features: [
+        { name: 'Postează până la 3 job-uri/lună', included: true },
+        { name: 'Mesaje cu profesioniștii', included: true },
+        { name: 'Suport prin email', included: true },
+        { name: 'Postări prioritare', included: false },
+        { name: 'Suport prin telefon', included: false },
+        { name: 'Manager dedicat', included: false },
+      ],
+      recommended: false,
+    },
+    {
+      id: 'client_premium',
+      name: 'Premium',
+      price: 29,
+      period: '/lună',
+      color: ['#3B82F6', '#1E40AF'],
+      features: [
+        { name: 'Job-uri nelimitate', included: true },
+        { name: 'Postări prioritare', included: true },
+        { name: 'Mesaje nelimitate', included: true },
+        { name: 'Suport prin telefon', included: true },
+        { name: 'Analiză detaliată', included: true },
+        { name: 'Manager dedicat', included: false },
+      ],
+      recommended: true,
+    },
+    {
+      id: 'client_business',
+      name: 'Business',
+      price: 79,
+      period: '/lună',
+      color: ['#7C3AED', '#5B21B6'],
+      features: [
+        { name: 'Tot din Premium +', included: true },
+        { name: 'Manager dedicat', included: true },
+        { name: 'Cont multi-utilizator', included: true },
+        { name: 'Integrări API', included: true },
+        { name: 'Rapoarte personalizate', included: true },
+        { name: 'SLA garantat', included: true },
+      ],
+      recommended: false,
+    },
+  ],
+  professional: [
+    {
+      id: 'pro_starter',
+      name: 'Starter',
+      price: 0,
+      period: 'Gratuit',
+      color: ['#6B7280', '#9CA3AF'],
+      features: [
+        { name: 'Profil de bază', included: true },
+        { name: 'Până la 5 aplicări/lună', included: true },
+        { name: '3 imagini în portofoliu', included: true },
+        { name: 'Statistici avansate', included: false },
+        { name: 'Insigna "Verificat"', included: false },
+        { name: 'Suport prioritar', included: false },
+      ],
+      recommended: false,
+    },
+    {
+      id: 'pro_professional',
+      name: 'Professional',
+      price: 49,
+      period: '/lună',
+      color: ['#10B981', '#059669'],
+      features: [
+        { name: 'Profil premium', included: true },
+        { name: 'Aplicări nelimitate', included: true },
+        { name: 'Portofoliu nelimitat', included: true },
+        { name: 'Insigna "Verificat"', included: true },
+        { name: 'Statistici avansate', included: true },
+        { name: 'Promovare în căutări', included: true },
+      ],
+      recommended: true,
+    },
+    {
+      id: 'pro_expert',
+      name: 'Expert',
+      price: 99,
+      period: '/lună',
+      color: ['#F59E0B', '#D97706'],
+      features: [
+        { name: 'Tot din Professional +', included: true },
+        { name: 'Insigna "Expert"', included: true },
+        { name: 'Primul în rezultate', included: true },
+        { name: 'Suport prioritar', included: true },
+        { name: 'Manager dedicat', included: true },
+        { name: 'Marketing personalizat', included: true },
+      ],
+      recommended: false,
+    },
+  ],
+};
 
 export default function SubscriptionScreen() {
-  const { user, isAuthenticated } = useOptimalAuth();
+  const { user } = useSimpleAuth();
+  const [isYearly, setIsYearly] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  // Get subscription plans from backend
-  const { data: plans, isLoading } = trpc.monetization.getSubscriptionPlans.useQuery();
+  const userPlans = user?.role === 'pro' ? subscriptionPlans.professional : subscriptionPlans.client;
+  const currentUserType = user?.role === 'pro' ? 'Profesionist' : 'Client';
 
-  // Subscribe to plan mutation
-  const subscribeMutation = trpc.monetization.subscribeToPlan.useMutation({
-    onSuccess: (data) => {
-      setIsSubscribing(false);
+  const getDiscountedPrice = (price: number) => {
+    return isYearly ? Math.round(price * 10) : price; // ~17% discount for yearly
+  };
+
+  const handleSubscribe = async (planId: string, price: number) => {
+    if (price === 0) {
+      Alert.alert('Plan Gratuit', 'Planul gratuit este deja activ!');
+      return;
+    }
+
+    setIsProcessing(true);
+    setSelectedPlan(planId);
+
+    try {
+      // Simulate payment processing
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
       Alert.alert(
-        'Abonare Reușită! 🎉',
-        data.message,
+        'Abonament Activat! 🎉',
+        `Abonamentul tău a fost activat cu succes. Poți începe să folosești toate funcționalitățile premium!`,
         [
           {
             text: 'OK',
@@ -46,81 +173,105 @@ export default function SubscriptionScreen() {
           },
         ]
       );
-    },
-    onError: (error) => {
-      setIsSubscribing(false);
-      Alert.alert('Eroare', `Nu am putut procesa abonarea: ${error.message}`);
-    },
-  });
-
-  const handleSubscribe = async () => {
-    if (!isAuthenticated) {
-      Alert.alert('Eroare', 'Trebuie să fii conectat pentru a te abona');
-      return;
-    }
-
-    if (!selectedPlan) {
-      Alert.alert('Eroare', 'Te rugăm să selectezi un plan');
-      return;
-    }
-
-    setIsSubscribing(true);
-
-    try {
-      await subscribeMutation.mutateAsync({
-        planId: selectedPlan as 'basic' | 'premium' | 'enterprise',
-        paymentMethod: 'card',
-        autoRenew: true,
-      });
     } catch (error) {
-      // Error handling is done in onError callback
+      Alert.alert('Eroare', 'Nu am putut procesa plata. Încearcă din nou.');
+    } finally {
+      setIsProcessing(false);
+      setSelectedPlan(null);
     }
   };
 
-  const getPlanIcon = (planId: string) => {
-    switch (planId) {
-      case 'free':
-        return <Shield size={24} color="#6B7280" />;
-      case 'basic':
-        return <Star size={24} color="#F59E0B" />;
-      case 'premium':
-        return <Crown size={24} color="#8B5CF6" />;
-      case 'enterprise':
-        return <Building size={24} color="#10B981" />;
-      default:
-        return <Shield size={24} color="#6B7280" />;
-    }
+  const renderPlanCard = (plan: any) => {
+    const finalPrice = getDiscountedPrice(plan.price);
+    const isSelected = selectedPlan === plan.id;
+    const isProcessingThis = isProcessing && isSelected;
+
+    return (
+      <View key={plan.id} style={[styles.planCard, plan.recommended && styles.recommendedCard]}>
+        {plan.recommended && (
+          <View style={styles.recommendedBadge}>
+            <Crown size={16} color="#FFFFFF" />
+            <Text style={styles.recommendedText}>Recomandat</Text>
+          </View>
+        )}
+
+        <LinearGradient colors={plan.color} style={styles.planHeader}>
+          <View style={styles.planTitleContainer}>
+            <Text style={styles.planName}>{plan.name}</Text>
+            {plan.price > 0 && (
+              <View style={styles.priceContainer}>
+                <Text style={styles.price}>{finalPrice}</Text>
+                <Text style={styles.currency}>RON</Text>
+                <Text style={styles.period}>
+                  {isYearly ? '/an' : plan.period}
+                </Text>
+              </View>
+            )}
+            {plan.price === 0 && (
+              <Text style={styles.freePrice}>Gratuit</Text>
+            )}
+          </View>
+        </LinearGradient>
+
+        <View style={styles.planContent}>
+          <View style={styles.featuresContainer}>
+            {plan.features.map((feature: any, index: number) => (
+              <View key={index} style={styles.featureItem}>
+                <View style={[
+                  styles.featureIcon,
+                  { backgroundColor: feature.included ? '#D1FAE5' : '#FEE2E2' }
+                ]}>
+                  {feature.included ? (
+                    <Check size={14} color="#10B981" />
+                  ) : (
+                    <X size={14} color="#EF4444" />
+                  )}
+                </View>
+                <Text style={[
+                  styles.featureText,
+                  { color: feature.included ? '#374151' : '#9CA3AF' }
+                ]}>
+                  {feature.name}
+                </Text>
+              </View>
+            ))}
+          </View>
+
+          <TouchableOpacity
+            style={[
+              styles.subscribeButton,
+              plan.recommended && styles.recommendedButton,
+              isProcessingThis && styles.processingButton
+            ]}
+            onPress={() => handleSubscribe(plan.id, finalPrice)}
+            disabled={isProcessingThis}
+          >
+            {isProcessingThis ? (
+              <Text style={styles.subscribeButtonText}>Se procesează...</Text>
+            ) : (
+              <>
+                {plan.price === 0 ? (
+                  <Text style={styles.subscribeButtonText}>Plan Activ</Text>
+                ) : (
+                  <>
+                    <CreditCard size={18} color="#FFFFFF" />
+                    <Text style={styles.subscribeButtonText}>
+                      Alege {plan.name}
+                    </Text>
+                  </>
+                )}
+              </>
+            )}
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
   };
 
-  const getPlanGradient = (planId: string): [string, string] => {
-    switch (planId) {
-      case 'free':
-        return ['#F3F4F6', '#E5E7EB'];
-      case 'basic':
-        return ['#FEF3C7', '#FDE68A'];
-      case 'premium':
-        return ['#E0E7FF', '#C7D2FE'];
-      case 'enterprise':
-        return ['#D1FAE5', '#A7F3D0'];
-      default:
-        return ['#F3F4F6', '#E5E7EB'];
-    }
-  };
-
-  // Helper function to check if plan has limitations
-  const hasLimitations = (plan: any): plan is { limitations: string[] } => {
-    return 'limitations' in plan && Array.isArray(plan.limitations);
-  };
-
-  // Helper function to check if plan has period and commission
-  const hasPeriodAndCommission = (plan: any): plan is { period: string; commission: string } => {
-    return 'period' in plan && 'commission' in plan;
-  };
-
-  if (isLoading) {
+  if (!user) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Se încarcă planurile...</Text>
+        <Text>Se încarcă...</Text>
       </View>
     );
   }
@@ -128,139 +279,175 @@ export default function SubscriptionScreen() {
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <ArrowLeft size={24} color="#1F2937" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Planuri de Abonare</Text>
-        <View style={styles.placeholder} />
-      </View>
+      <LinearGradient colors={['#667eea', '#764ba2']} style={styles.header}>
+        <View style={styles.headerContent}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <ArrowLeft size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Abonamente</Text>
+          <View style={styles.placeholder} />
+        </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Hero Section */}
         <View style={styles.heroSection}>
-          <Text style={styles.heroTitle}>Alege Planul Perfect pentru Afacerea Ta</Text>
+          <Text style={styles.heroTitle}>
+            Planuri pentru {currentUserType}
+          </Text>
           <Text style={styles.heroSubtitle}>
-            Deblochează toate funcționalitățile și crește-ți veniturile cu Meșterul
+            {user.role === 'pro' 
+              ? 'Dezvoltă-ți afacerea și câștigă mai mult cu planurile noastre premium'
+              : 'Găsește cei mai buni profesioniști cu planurile noastre premium'
+            }
           </Text>
         </View>
+      </LinearGradient>
 
-        {/* Plans Grid */}
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Billing Toggle */}
+        <View style={styles.billingToggleContainer}>
+          <View style={styles.billingToggle}>
+            <Text style={[styles.billingOption, !isYearly && styles.billingOptionActive]}>
+              Lunar
+            </Text>
+            <Switch
+              value={isYearly}
+              onValueChange={setIsYearly}
+              trackColor={{ false: '#E5E7EB', true: '#10B981' }}
+              thumbColor="#FFFFFF"
+            />
+            <Text style={[styles.billingOption, isYearly && styles.billingOptionActive]}>
+              Anual
+            </Text>
+            {isYearly && (
+              <View style={styles.discountBadge}>
+                <Gift size={12} color="#10B981" />
+                <Text style={styles.discountText}>~17% reducere</Text>
+              </View>
+            )}
+          </View>
+        </View>
+
+        {/* Plans */}
         <View style={styles.plansContainer}>
-          {plans?.map((plan) => (
-            <TouchableOpacity
-              key={plan.id}
-              style={[
-                styles.planCard,
-                selectedPlan === plan.id && styles.selectedPlanCard
-              ]}
-              onPress={() => setSelectedPlan(plan.id)}
-            >
-              <LinearGradient
-                colors={getPlanGradient(plan.id)}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.planHeader}
-              >
-                <View style={styles.planIconContainer}>
-                  {getPlanIcon(plan.id)}
-                </View>
-                <Text style={styles.planName}>{plan.name}</Text>
-                <View style={styles.priceContainer}>
-                  <Text style={styles.price}>{plan.price}</Text>
-                  {plan.price > 0 && (
-                    <Text style={styles.currency}>RON</Text>
-                  )}
-                  {('period' in plan) && (
-                    <Text style={styles.period}>/{plan.period}</Text>
-                  )}
-                </View>
-                {plan.price === 0 && (
-                  <Text style={styles.freeText}>Gratuit</Text>
-                )}
-              </LinearGradient>
+          {userPlans.map(renderPlanCard)}
+        </View>
 
-              <View style={styles.planContent}>
-                <Text style={styles.featuresTitle}>Inclus în plan:</Text>
-                {plan.features.map((feature, index) => (
-                  <View key={index} style={styles.featureRow}>
-                    <Check size={16} color="#10B981" />
-                    <Text style={styles.featureText}>{feature}</Text>
+        {/* Features Comparison */}
+        <View style={styles.comparisonSection}>
+          <Text style={styles.comparisonTitle}>De ce să alegi Premium?</Text>
+          
+          <View style={styles.benefitsContainer}>
+            {user.role === 'pro' ? (
+              <>
+                <View style={styles.benefitItem}>
+                  <View style={styles.benefitIcon}>
+                    <TrendingUp size={24} color="#10B981" />
                   </View>
-                ))}
-
-                {('limitations' in plan) && plan.limitations && plan.limitations.length > 0 && (
-                  <>
-                    <Text style={styles.limitationsTitle}>Limitări:</Text>
-                    {plan.limitations.map((limitation: string, index: number) => (
-                      <View key={index} style={styles.limitationRow}>
-                        <Text style={styles.limitationText}>• {limitation}</Text>
-                      </View>
-                    ))}
-                  </>
-                )}
-
-                {('commission' in plan) && (
-                  <View style={styles.commissionContainer}>
-                    <Text style={styles.commissionText}>
-                      Comision: {plan.commission}
+                  <View style={styles.benefitContent}>
+                    <Text style={styles.benefitTitle}>Mai multe oportunități</Text>
+                    <Text style={styles.benefitDescription}>
+                      Aplică la job-uri nelimitate și crește-ți veniturile
                     </Text>
                   </View>
-                )}
-              </View>
-            </TouchableOpacity>
-          ))}
+                </View>
+
+                <View style={styles.benefitItem}>
+                  <View style={styles.benefitIcon}>
+                    <Star size={24} color="#F59E0B" />
+                  </View>
+                  <View style={styles.benefitContent}>
+                    <Text style={styles.benefitTitle}>Vizibilitate maximă</Text>
+                    <Text style={styles.benefitDescription}>
+                      Apari primul în rezultatele de căutare
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.benefitItem}>
+                  <View style={styles.benefitIcon}>
+                    <Shield size={24} color="#3B82F6" />
+                  </View>
+                  <View style={styles.benefitContent}>
+                    <Text style={styles.benefitTitle}>Insigna verificat</Text>
+                    <Text style={styles.benefitDescription}>
+                      Crește încrederea clienților în serviciile tale
+                    </Text>
+                  </View>
+                </View>
+              </>
+            ) : (
+              <>
+                <View style={styles.benefitItem}>
+                  <View style={styles.benefitIcon}>
+                    <Zap size={24} color="#F59E0B" />
+                  </View>
+                  <View style={styles.benefitContent}>
+                    <Text style={styles.benefitTitle}>Răspunsuri mai rapide</Text>
+                    <Text style={styles.benefitDescription}>
+                      Job-urile tale apar prioritar în feed-ul profesioniștilor
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.benefitItem}>
+                  <View style={styles.benefitIcon}>
+                    <Users size={24} color="#10B981" />
+                  </View>
+                  <View style={styles.benefitContent}>
+                    <Text style={styles.benefitTitle}>Acces la cei mai buni</Text>
+                    <Text style={styles.benefitDescription}>
+                      Contactează profesioniștii premium verificați
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.benefitItem}>
+                  <View style={styles.benefitIcon}>
+                    <Clock size={24} color="#3B82F6" />
+                  </View>
+                  <View style={styles.benefitContent}>
+                    <Text style={styles.benefitTitle}>Suport prioritar</Text>
+                    <Text style={styles.benefitDescription}>
+                      Răspuns în maxim 2 ore la toate întrebările
+                    </Text>
+                  </View>
+                </View>
+              </>
+            )}
+          </View>
         </View>
 
-        {/* Subscribe Button */}
-        {selectedPlan && selectedPlan !== 'free' && (
-          <View style={styles.subscribeContainer}>
-            <TouchableOpacity
-              style={[styles.subscribeButton, isSubscribing && styles.subscribeButtonDisabled]}
-              onPress={handleSubscribe}
-              disabled={isSubscribing}
-            >
-              <CreditCard size={20} color="#FFFFFF" />
-              <Text style={styles.subscribeButtonText}>
-                {isSubscribing ? 'Se procesează...' : 'Abonează-te Acum'}
+        {/* FAQ Section */}
+        <View style={styles.faqSection}>
+          <Text style={styles.faqTitle}>Întrebări frecvente</Text>
+          
+          <View style={styles.faqContainer}>
+            <View style={styles.faqItem}>
+              <Text style={styles.faqQuestion}>Pot să îmi schimb planul oricând?</Text>
+              <Text style={styles.faqAnswer}>
+                Da, poți să îți schimbi planul oricând din aplicație. Modificările se aplică imediat.
               </Text>
-            </TouchableOpacity>
-            <Text style={styles.subscribeNote}>
-              * Abonamentul se reînnoiește automat lunar
-            </Text>
-          </View>
-        )}
+            </View>
 
-        {/* Benefits Section */}
-        <View style={styles.benefitsSection}>
-          <Text style={styles.benefitsTitle}>De ce să te abonezi?</Text>
-          <View style={styles.benefitsGrid}>
-            <View style={styles.benefitItem}>
-              <Zap size={24} color="#F59E0B" />
-              <Text style={styles.benefitTitle}>Răspuns Rapid</Text>
-              <Text style={styles.benefitText}>
-                Primești notificări prioritare pentru job-uri noi
+            <View style={styles.faqItem}>
+              <Text style={styles.faqQuestion}>Ce se întâmplă dacă anulez abonamentul?</Text>
+              <Text style={styles.faqAnswer}>
+                Poți folosi funcționalitățile premium până la sfârșitul perioadei plătite, apoi contul revine la planul gratuit.
               </Text>
             </View>
-            <View style={styles.benefitItem}>
-              <Shield size={24} color="#10B981" />
-              <Text style={styles.benefitTitle}>Verificare Prioritară</Text>
-              <Text style={styles.benefitText}>
-                Profilul tău este verificat înaintea celorlalți
-              </Text>
-            </View>
-            <View style={styles.benefitItem}>
-              <Star size={24} color="#8B5CF6" />
-              <Text style={styles.benefitTitle}>Promovare</Text>
-              <Text style={styles.benefitText}>
-                Apari mai sus în rezultatele de căutare
+
+            <View style={styles.faqItem}>
+              <Text style={styles.faqQuestion}>Sunt taxe ascunse?</Text>
+              <Text style={styles.faqAnswer}>
+                Nu, prețurile afișate includ toate taxele. Nu există taxe ascunse sau costuri suplimentare.
               </Text>
             </View>
           </View>
         </View>
+
+        <View style={styles.bottomSpacing} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -276,20 +463,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  loadingText: {
-    fontSize: 16,
-    color: '#6B7280',
-  },
   header: {
+    paddingTop: height * 0.02,
+    paddingBottom: 24,
+  },
+  headerContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 20,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    marginBottom: 20,
   },
   backButton: {
     padding: 8,
@@ -297,31 +480,70 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1F2937',
+    color: '#FFFFFF',
   },
   placeholder: {
     width: 40,
   },
-  content: {
-    flex: 1,
-  },
   heroSection: {
-    padding: 24,
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 40,
   },
   heroTitle: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: '700',
-    color: '#1F2937',
+    color: '#FFFFFF',
     textAlign: 'center',
     marginBottom: 12,
   },
   heroSubtitle: {
     fontSize: 16,
-    color: '#6B7280',
+    color: 'rgba(255, 255, 255, 0.9)',
     textAlign: 'center',
     lineHeight: 24,
+  },
+  content: {
+    flex: 1,
+  },
+  billingToggleContainer: {
+    alignItems: 'center',
+    paddingVertical: 24,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  billingToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    borderRadius: 12,
+    padding: 4,
+    gap: 16,
+  },
+  billingOption: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#6B7280',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  billingOptionActive: {
+    color: '#1F2937',
+    fontWeight: '600',
+  },
+  discountBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#D1FAE5',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    gap: 4,
+  },
+  discountText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#10B981',
   },
   plansContainer: {
     padding: 20,
@@ -331,170 +553,189 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     overflow: 'hidden',
-    borderWidth: 2,
-    borderColor: 'transparent',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 4,
   },
-  selectedPlanCard: {
-    borderColor: '#2563EB',
-    shadowColor: '#2563EB',
-    shadowOpacity: 0.2,
+  recommendedCard: {
+    borderWidth: 2,
+    borderColor: '#3B82F6',
+    transform: [{ scale: 1.02 }],
+  },
+  recommendedBadge: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#3B82F6',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    gap: 4,
+    zIndex: 1,
+  },
+  recommendedText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
   planHeader: {
     padding: 24,
     alignItems: 'center',
   },
-  planIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#FFFFFF',
+  planTitleContainer: {
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
   },
   planName: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: '700',
-    color: '#1F2937',
-    marginBottom: 8,
+    color: '#FFFFFF',
+    marginBottom: 12,
   },
   priceContainer: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    marginBottom: 8,
+    gap: 4,
   },
   price: {
-    fontSize: 32,
+    fontSize: 48,
     fontWeight: '800',
-    color: '#1F2937',
+    color: '#FFFFFF',
   },
   currency: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#6B7280',
-    marginLeft: 4,
+    color: 'rgba(255, 255, 255, 0.8)',
   },
   period: {
-    fontSize: 14,
-    color: '#6B7280',
-    marginLeft: 4,
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.8)',
   },
-  freeText: {
-    fontSize: 18,
+  freePrice: {
+    fontSize: 32,
     fontWeight: '700',
-    color: '#10B981',
+    color: '#FFFFFF',
   },
   planContent: {
     padding: 24,
   },
-  featuresTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 16,
+  featuresContainer: {
+    marginBottom: 24,
+    gap: 12,
   },
-  featureRow: {
+  featureItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    gap: 12,
+  },
+  featureIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   featureText: {
     fontSize: 14,
-    color: '#6B7280',
-    marginLeft: 12,
     flex: 1,
-  },
-  limitationsTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#374151',
-    marginTop: 20,
-    marginBottom: 16,
-  },
-  limitationRow: {
-    marginBottom: 8,
-  },
-  limitationText: {
-    fontSize: 14,
-    color: '#9CA3AF',
-    marginLeft: 16,
-  },
-  commissionContainer: {
-    marginTop: 20,
-    padding: 16,
-    backgroundColor: '#F3F4F6',
-    borderRadius: 8,
-  },
-  commissionText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#10B981',
-    textAlign: 'center',
-  },
-  subscribeContainer: {
-    padding: 20,
-    alignItems: 'center',
+    lineHeight: 20,
   },
   subscribeButton: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#6B7280',
+    borderRadius: 12,
+    paddingVertical: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 18,
-    paddingHorizontal: 32,
-    borderRadius: 12,
-    marginBottom: 12,
+    gap: 8,
   },
-  subscribeButtonDisabled: {
-    backgroundColor: '#9CA3AF',
+  recommendedButton: {
+    backgroundColor: '#3B82F6',
+  },
+  processingButton: {
+    opacity: 0.7,
   },
   subscribeButtonText: {
-    color: '#FFFFFF',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
-    marginLeft: 8,
+    color: '#FFFFFF',
   },
-  subscribeNote: {
-    fontSize: 12,
-    color: '#9CA3AF',
-    textAlign: 'center',
-  },
-  benefitsSection: {
-    padding: 24,
+  comparisonSection: {
+    padding: 20,
     backgroundColor: '#FFFFFF',
-    margin: 20,
-    borderRadius: 16,
+    marginTop: 20,
   },
-  benefitsTitle: {
+  comparisonTitle: {
     fontSize: 20,
     fontWeight: '700',
     color: '#1F2937',
     textAlign: 'center',
     marginBottom: 24,
   },
-  benefitsGrid: {
+  benefitsContainer: {
     gap: 20,
   },
   benefitItem: {
+    flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    gap: 16,
+  },
+  benefitIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#F3F4F6',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  benefitContent: {
+    flex: 1,
   },
   benefitTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#374151',
-    marginTop: 12,
-    marginBottom: 8,
+    color: '#1F2937',
+    marginBottom: 4,
   },
-  benefitText: {
+  benefitDescription: {
     fontSize: 14,
     color: '#6B7280',
-    textAlign: 'center',
     lineHeight: 20,
+  },
+  faqSection: {
+    padding: 20,
+    backgroundColor: '#FFFFFF',
+    marginTop: 20,
+  },
+  faqTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 20,
+  },
+  faqContainer: {
+    gap: 16,
+  },
+  faqItem: {
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+    padding: 16,
+  },
+  faqQuestion: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1F2937',
+    marginBottom: 8,
+  },
+  faqAnswer: {
+    fontSize: 14,
+    color: '#6B7280',
+    lineHeight: 20,
+  },
+  bottomSpacing: {
+    height: 40,
   },
 });

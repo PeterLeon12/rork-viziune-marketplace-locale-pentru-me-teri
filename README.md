@@ -1,155 +1,141 @@
-# 🏠 Rork Marketplace - Local Tradespeople Finder
+# 🇷🇴 Rork - Viziune Marketplace Local pentru Meșteri
 
-A modern marketplace app for finding reliable tradespeople (meșteri) in Cluj-Napoca, Romania. Built with React Native, Expo, and a robust backend.
+**Aplicație de marketplace local pentru servicii în România**
 
-## ✨ Features
+## 📱 Despre Aplicația
 
-- **🔍 Smart Search**: Find tradespeople by category, area, rating, and availability
-- **📱 Modern UI**: Beautiful, intuitive interface built with React Native
-- **🔐 Secure Authentication**: Phone-based OTP verification via WhatsApp
-- **⭐ Rating System**: Real reviews and ratings from verified customers
-- **📍 Local Focus**: Tailored specifically for Cluj-Napoca market
-- **💼 Professional Profiles**: Detailed profiles with services and contact information
+Rork este o platformă de marketplace local care conectează clienții cu meșteri și profesioniști din România. Aplicația permite utilizatorilor să găsească, să contacteze și să evalueze serviciile locale.
 
-## 🏗️ Architecture
+## ✨ Funcționalități Principale
 
-- **Frontend**: React Native with Expo Router
-- **Backend**: Hono.js with tRPC for type-safe APIs
-- **Database**: PostgreSQL with Drizzle ORM
-- **Authentication**: JWT with phone OTP verification
-- **State Management**: Zustand
-- **Styling**: NativeWind (Tailwind CSS)
+### 🔐 Autentificare
+- Înregistrare și conectare utilizatori
+- Gestionare profil personal
+- Roluri separate pentru clienți și profesioniști
 
-## 🚀 Quick Start
+### 🏠 Acasă
+- Dashboard personalizat
+- Servicii recomandate
+- Navigare rapidă
 
-### Prerequisites
+### 🔍 Căutare
+- Căutare servicii după categorie
+- Filtrare după regiune
+- Rezultate personalizate
+
+### 💼 Job-uri
+- **Pentru clienți**: Postare cereri de servicii
+- **Pentru profesioniști**: Vizualizare oportunități
+- Gestionare cereri active
+
+### 💬 Mesaje
+- Sistem de mesajerie integrat
+- Conversații cu profesioniști
+- Istoric comunicări
+
+### 👤 Profil
+- Gestionare informații personale
+- Istoric servicii
+- Setări aplicație
+
+## 🛠️ Tehnologii
+
+- **Frontend**: React Native + Expo
+- **Navigare**: Expo Router
+- **Stilizare**: NativeWind (Tailwind CSS)
+- **Stocare**: AsyncStorage
+- **Iconuri**: Lucide React Native
+- **Limbaj**: TypeScript
+
+## 🚀 Instalare și Rulare
+
+### Cerințe
 - Node.js 18+
-- Docker (optional, for database)
-- PostgreSQL 15+ (if not using Docker)
+- npm sau yarn
+- Expo CLI
 
-### 1. Clone and Setup
+### Pași
 ```bash
-git clone <repository-url>
+# Clonează repository-ul
+git clone https://github.com/PeterLeon12/rork-viziune-marketplace-locale-pentru-me-teri.git
+
+# Intră în director
 cd rork-viziune-marketplace-locale-pentru-me-teri
-```
 
-### 2. Automated Setup (Recommended)
-```bash
-./setup.sh
-```
-
-### 3. Manual Setup
-```bash
-# Start database
-docker-compose up -d postgres
-
-# Setup backend
-cd backend
+# Instalează dependențele
 npm install
-cp env.example .env
-# Edit .env with your configuration
-npm run db:generate
-npm run db:migrate
-npm run db:seed
-npm run dev
 
-# Setup frontend (in another terminal)
-npm install
+# Pornește aplicația
 npm start
 ```
 
-## 📱 App Structure
+### Comenzi Disponibile
+- `npm start` - Pornește Expo cu tunnel
+- `npm run android` - Rulează pe Android
+- `npm run ios` - Rulează pe iOS
+- `npm run lint` - Verifică codul
+
+## 📱 Testare
+
+1. **Instalează Expo Go** pe telefonul tău
+2. **Scanează QR code-ul** din terminal
+3. **Testează funcționalitățile**:
+   - Înregistrare utilizator nou
+   - Căutare servicii
+   - Postare job-uri
+   - Mesajerie
+
+## 🏗️ Structura Proiectului
 
 ```
 app/
-├── (tabs)/           # Main tab navigation
-│   ├── index.tsx     # Home screen
-│   ├── search.tsx    # Search functionality
-│   ├── messages.tsx  # Messaging (coming soon)
-│   └── profile.tsx   # User profile & auth
-├── pro/              # Professional onboarding
-└── pro-onboarding.tsx
+├── (tabs)/           # Navigare cu tab-uri
+│   ├── index.tsx     # Pagina principală
+│   ├── search.tsx    # Căutare servicii
+│   ├── jobs.tsx      # Gestionare job-uri
+│   ├── post-job.tsx  # Postare job-uri
+│   ├── messages.tsx  # Sistem mesajerie
+│   └── optimal-profile.tsx # Profil utilizator
+├── login.tsx         # Autentificare
+├── register.tsx      # Înregistrare
+├── messaging.tsx     # Mesajerie
+└── subscription.tsx  # Gestionare abonamente
 
-backend/
-├── src/
-│   ├── db/          # Database schema & connection
-│   ├── trpc/        # tRPC API routers
-│   ├── services/    # External services (Twilio)
-│   └── utils/       # Authentication utilities
-└── drizzle/         # Database migrations
+components/            # Componente reutilizabile
+├── SearchBar.tsx     # Bară de căutare
+├── RegionSelector.tsx # Selector regiune
+└── Loading.tsx       # Componentă loading
+
+contexts/             # Context-uri React
+└── SimpleAuthContext.tsx # Gestionare autentificare
 ```
 
-## 🔧 Development
+## 🎯 Caracteristici Tehnice
 
-### Backend Development
-```bash
-cd backend
-npm run dev          # Start development server
-npm run db:studio    # Open database studio
-npm run db:generate  # Generate new migrations
-npm run db:migrate   # Run migrations
-```
+- **Cross-platform**: iOS și Android
+- **Offline-first**: Funcționează fără internet
+- **Performance**: Optimizat pentru dispozitive mobile
+- **Accessibility**: Suport pentru accesibilitate
+- **Type Safety**: TypeScript pentru cod sigur
 
-### Frontend Development
-```bash
-npm start           # Start Expo development server
-npm run start-web   # Start web version
-npm run lint        # Run linting
-```
+## 🤝 Contribuții
 
-## 🌐 Deployment
+1. Fork repository-ul
+2. Creează un branch pentru feature (`git checkout -b feature/noua-functie`)
+3. Commit schimbările (`git commit -am 'Adaugă funcționalitate nouă'`)
+4. Push la branch (`git push origin feature/noua-functie`)
+5. Creează un Pull Request
 
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for comprehensive deployment instructions.
+## 📄 Licență
 
-### Quick Deploy Options
-- **Backend**: Railway, Heroku, or Vercel
-- **Frontend**: EAS Build for mobile, Vercel for web
-- **Database**: Supabase, Railway, or managed PostgreSQL
+Acest proiect este licențiat sub [MIT License](LICENSE).
 
-## 🔐 Environment Variables
+## 📞 Contact
 
-### Backend (.env)
-```env
-DATABASE_URL="postgresql://user:password@localhost:5432/database"
-JWT_SECRET="your-secret-key"
-TWILIO_ACCOUNT_SID="your-twilio-sid"
-TWILIO_AUTH_TOKEN="your-twilio-token"
-TWILIO_PHONE_NUMBER="+1234567890"
-```
-
-### Frontend (.env)
-```env
-EXPO_PUBLIC_BACKEND_URL="http://localhost:3000"
-```
-
-## 📊 Database Schema
-
-- **Users**: Authentication and profile information
-- **ProProfiles**: Professional service provider profiles
-- **Services**: Individual services offered by professionals
-- **Reviews**: Customer reviews and ratings
-- **Categories**: Service categories (plumbing, electrical, etc.)
-- **Areas**: Geographic coverage areas
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
-## 🆘 Support
-
-For support and questions:
-- Check the [deployment guide](./DEPLOYMENT.md)
-- Review the troubleshooting section
-- Open an issue on GitHub
+- **Dezvoltator**: Peter Leon
+- **GitHub**: [@PeterLeon12](https://github.com/PeterLeon12)
+- **Proiect**: [Rork Marketplace](https://github.com/PeterLeon12/rork-viziune-marketplace-locale-pentru-me-teri)
 
 ---
 
-**Built with ❤️ for the Cluj-Napoca community**
+**🇷🇴 Construit cu ❤️ pentru România**
